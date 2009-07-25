@@ -31,7 +31,7 @@ abstract class Message() extends Ordered[Message] with RandomAccessSeq[Field] {
   }
 
   def length = sortedFields.length
-  def apply(index: Int) = sortedFields(index) 
+  def apply(index: Int) = sortedFields(index)
   def compare(that: Message) = this.sortedFields.compare(that.sortedFields)
 
   def get(index: Int): Field = this(index)

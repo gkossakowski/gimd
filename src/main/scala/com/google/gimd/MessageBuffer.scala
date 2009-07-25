@@ -22,7 +22,7 @@ class MessageBuffer extends Message {
     private var fields = new ArrayBuffer[Field]
     private var exported = false
     private var isSorted = true
-    
+
     private def beforeModify() {
       if (exported) {
         val t = new ArrayBuffer[Field]

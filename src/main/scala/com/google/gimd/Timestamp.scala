@@ -22,7 +22,7 @@ object Timestamp {
   def now: Timestamp = apply(System.currentTimeMillis, localOffset)
   private val localOffset = TimeZone.getDefault.getRawOffset
 
-  def apply(time: Date): Timestamp              = apply(time, 0) 
+  def apply(time: Date): Timestamp              = apply(time, 0)
   def apply(time: Date, offset: Int): Timestamp = apply(time.getTime, offset)
   def apply(time: Long): Timestamp              = apply(time, 0)
   def apply(time: Long, offset: Int): Timestamp = new Timestamp(time, offset)
@@ -46,7 +46,7 @@ final class Timestamp(
     val offsetMins = offset.abs % 60
 
     val tzId = new StringBuilder(8)
-    tzId.append("GMT")    
+    tzId.append("GMT")
     tzId.append(if (offset < 0) '-' else '+');
     if (offsetHours < 10)
         tzId.append('0')

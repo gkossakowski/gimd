@@ -39,7 +39,7 @@ class MessageIterator(msg: Message) {
 
   private def next() = cur = if (i.hasNext) Some(i.next()) else None
   private def use = cur match {
-    case Some(f) => { 
+    case Some(f) => {
       retry = true
       next()
       f

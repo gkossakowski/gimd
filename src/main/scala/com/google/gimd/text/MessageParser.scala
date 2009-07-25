@@ -21,5 +21,5 @@ import com.google.gimd.Message
 class MessageParser {
   def parse(in: String)         = Parser.parse(in)
   def parse(in: java.io.Reader) = Parser.parse(in)
-  def parse(in: Reader[Char])   = Parser.parse(in) 
+  def parse(in: Reader[Char])   = Parser.parse(in)
 }

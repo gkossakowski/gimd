@@ -22,7 +22,7 @@ object TextLanguageRules {
    * code, unless they are one of the following common printables used in that
    * space: \t (tab), \n (LF), \r (CR).
    */
-  def isNeedHexEscape(ch: Char) = 
+  def isNeedHexEscape(ch: Char) =
     if (ch < 0x20)
       ch match {
         case 0x09 /* \t */ => false
