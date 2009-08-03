@@ -17,7 +17,7 @@ package com.google.gimd
 import scala.util.Sorting
 import scala.collection.mutable.ArrayBuffer
 
-class MessageBuffer extends Message {
+class MessageBuffer {
   private class FieldStorage {
     private var fields = new ArrayBuffer[Field]
     private var exported = false
@@ -99,7 +99,7 @@ class MessageBuffer extends Message {
 
   def add(name: String, value: Message): MessageBuffer =
     if (value != null && !value.isEmpty)
-      add(MessageField(name, value.readOnly))
+      add(MessageField(name, value))
     else
       this
 
@@ -116,19 +116,13 @@ class MessageBuffer extends Message {
     this
   }
 
-  override def ++(iter: Iterable[Field]) = {
+  def ++(iter: Iterable[Field]) = {
     val buffer = new MessageBuffer
     buffer ++= fields.unsorted
     buffer ++= iter
     buffer
   }
 
-  def readOnly = {
-    // TODO - How do we combine fields from a prior version of the Message
-    // as we aren't permitted to lose them?  Is it just enough to say we
-    // copy in fields from the prior Message which do not appear in this
-    // new builder instance?
+  def readOnly = Message(fields.sorted: _*) 
 
-    new ImmutableMessage(fields.sorted)
-  }
 }

@@ -14,27 +14,26 @@
 
 package com.google.gimd;
 
+import collection.immutable.TreeSet
+import collection.Sorted
 import com.google.gimd.text.Formatter
 
 object Message {
-  val empty: Message = new ImmutableMessage(RandomAccessSeq.empty)
-  def apply(fields: Seq[Field]) = empty ++ fields
-  def apply(fields: Field*) = new ImmutableMessage(fields.toArray)
+  val empty: Message = new Message(TreeSet.empty)
+  def apply(fields: Iterable[Field]) = empty ++ fields
+  def apply(fields: Field*) = new Message(TreeSet(fields: _*))
 }
 
-abstract class Message() extends Ordered[Message] with RandomAccessSeq[Field] {
-  protected def sortedFields: RandomAccessSeq[Field]
+final class Message(private val fields: Sorted[Field, Field])
+        extends Ordered[Message] with Sorted[Field, Field] {
 
   override def equals(that: Any) = that match {
     case that: Message => compare(that) == 0
     case _ => false
   }
 
-  def length = sortedFields.length
-  def apply(index: Int) = sortedFields(index)
-  def compare(that: Message) = this.sortedFields.compare(that.sortedFields)
-
-  def get(index: Int): Field = this(index)
+  override def compare(that: Message) = iterable2ordered(this.fields).compare(that.fields)
+  override def compare(k0: Field, k1: Field) = k0.compare(k1)  
 
   def +(field: Field): Message = {
     val buffer = new MessageBuffer
@@ -50,12 +49,13 @@ abstract class Message() extends Ordered[Message] with RandomAccessSeq[Field] {
     buffer.readOnly
   }
 
-  def iterator = new MessageIterator(this)
-  def readOnly: ImmutableMessage
-  override def toString = Formatter.format(this)
-}
+  override def rangeImpl(from: Option[Field], until: Option[Field]) = fields.rangeImpl(from, until)
+  override def keySet = fields.keySet
+  override def lastKey = fields.lastKey
+  override def firstKey = fields.firstKey
+  override def elements = fields.elements
 
-final class ImmutableMessage(val myFields: RandomAccessSeq[Field]) extends Message {
-  protected def sortedFields = myFields
-  def readOnly = this
+  def iterator = new MessageIterator(this)
+
+  override def toString = Formatter.format(this)
 }
