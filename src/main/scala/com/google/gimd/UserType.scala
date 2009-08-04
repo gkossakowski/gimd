@@ -20,5 +20,5 @@ abstract class UserType[T] {
   def toUserType(itr: Message): T
   def toMessage(obj: T) = toMessageBuffer(obj).readOnly
   def toMessageBuffer(obj: T): MessageBuffer
-  def children: Seq[NestedMember[Any]] = Seq()
+  def children: Seq[NestedMember[_]] = Seq()
 }
