@@ -15,6 +15,8 @@
 package com.google.gimd
 
 abstract class UserType[T] {
+  def userTypeClass: Class[T] = ClassUtils.beanTypeOf(this.getClass, classOf[UserType[T]])
+
   def toUserType(itr: Message): T
   def toMessage(obj: T) = toMessageBuffer(obj).readOnly
   def toMessageBuffer(obj: T): MessageBuffer
