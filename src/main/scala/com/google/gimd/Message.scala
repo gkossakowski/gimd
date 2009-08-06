@@ -14,9 +14,9 @@
 
 package com.google.gimd;
 
-import collection.immutable.TreeSet
-import collection.Sorted
 import com.google.gimd.text.Formatter
+import scala.collection.immutable.TreeSet
+import scala.collection.Sorted
 
 object Message {
   val empty: Message = new Message(TreeSet.empty)
@@ -39,7 +39,7 @@ final class Message(private val fields: Sorted[Field, Field])
   }
 
   override def compare(that: Message) = iterable2ordered(this.fields).compare(that.fields)
-  override def compare(k0: Field, k1: Field) = k0.compare(k1)  
+  override def compare(k0: Field, k1: Field) = k0.compare(k1)
 
   def +(field: Field): Message = {
     val buffer = new MessageBuffer
@@ -62,6 +62,32 @@ final class Message(private val fields: Sorted[Field, Field])
   override def elements = fields.elements
 
   def iterator = new MessageIterator(this)
+
+  /**
+   * Returns all fields having name equal to given.
+   *
+   * This implementation is efficient because it does take advantage of the fact that Message is
+   * Sorted collection so operation is performed in O(log(n)) time.
+   */
+  def all(name: String): Sorted[Field,Field] = range(MinimumField(name), MaximumField(name))
+
+  /**
+   * @throws Predef.NoSuchElementException if there is more than one field with given name
+   */
+  def oneOption(name: String): Option[Field] = all(name).take(2).toList match {
+    case Nil => None
+    case x :: Nil => Some(x)
+    case x :: xs => throw new NoSuchElementException("There are more than one " +
+                                                     "fields named " + name)
+  }
+
+  /**
+   * Returns field with passed name.
+   *
+   * @throws Predef.NoSuchElementException if either there's no element with given name or
+   * there are more than one
+   */
+  def one(name: String): Field = oneOption(name).get
 
   override def toString = Formatter.format(this)
 }
