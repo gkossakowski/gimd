@@ -46,7 +46,7 @@ class MessageQueryTestCase {
 
   @Test
   def simpleQuery = {
-    import Predicate._
+    import Predicate.functionLiteral2Predicate
     val reader = new java.io.InputStreamReader(
       this.getClass.getResourceAsStream("simpleMessage.gimd")
     )
