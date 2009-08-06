@@ -130,6 +130,6 @@ sealed case class BigDecimalField(name: String, value: BigDecimal) extends Numbe
  */
 sealed case class MinimumField(name: String) extends Field
 /**
- * Maximum field is a special field domain that is miximal in domain order
+ * Maximum field is a special field domain that is maximal in domain order
  */
 sealed case class MaximumField(name: String) extends Field
