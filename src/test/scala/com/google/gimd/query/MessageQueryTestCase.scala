@@ -47,10 +47,14 @@ class MessageQueryTestCase {
   @Test
   def simpleQuery = {
     import Predicate._
-    val reader = new java.io.InputStreamReader(this.getClass.getResourceAsStream("simpleMessage.gimd"))
+    val reader = new java.io.InputStreamReader(
+      this.getClass.getResourceAsStream("simpleMessage.gimd")
+    )
     val message = gimd.text.Parser.parse(reader)
-    val queryResult = MessageQuery.simpleQuery(new SimpleMessageType(), message, (child: Child) => child.property1 == true)
-    val expectedResult = List(Child("Child1", true), Child("Child3", true), Child("Child5", true))
+    val queryResult = MessageQuery.simpleQuery(new SimpleMessageType(), message,
+      (child: Child) => child.property1 == true)
+    val expectedResult = List(Child("Child1", true), Child("Child3", true),
+                              Child("Child5", true))
     assertEquals(expectedResult, queryResult)
   }
 
