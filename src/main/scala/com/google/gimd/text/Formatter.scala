@@ -84,6 +84,8 @@ class Formatter {
     case b: BigDecimalField => buf.append(format(b.value.bigDecimal))
     case n: NumberField  => buf.append(n.toNumber.toString)
     case t: TimestampField => formatValue(t.value)
+    case min: MinimumField => throw new IllegalArgumentException("Cannot format field " + min)
+    case max: MaximumField => throw new IllegalArgumentException("Cannot format field " + max)
   }
 
   private def nested(level: Int, m: Message) = {

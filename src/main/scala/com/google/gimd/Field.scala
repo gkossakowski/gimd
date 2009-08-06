@@ -51,10 +51,12 @@ abstract sealed case class Field() extends Ordered[Field] with Comparable[Field]
   }
 
   private def domainOrder = this match {
+    case a: MinimumField    => -1
     case a: NumberField     => 0
     case a: TimestampField  => 1
     case a: StringField     => 2
     case a: MessageField    => 3
+    case a: MaximumField    => 4
   }
 
   private def cmp(a: BigDecimal, b: BigDecimal) = {
@@ -122,3 +124,12 @@ sealed case class BigDecimalField(name: String, value: BigDecimal) extends Numbe
   def toBigDecimal = value
   override def bigDecimalField = this
 }
+
+/**
+ * Minimum field is a special field domain that is minimal in domain order
+ */
+sealed case class MinimumField(name: String) extends Field
+/**
+ * Maximum field is a special field domain that is miximal in domain order
+ */
+sealed case class MaximumField(name: String) extends Field
