@@ -25,11 +25,9 @@ class MessageQueryTestCase {
   class ChildType extends UserType[Child] {
     def toMessageBuffer(child: Child) = (new MessageBuffer()) ++
             List(Field("name", child.name), Field("property1", child.property1.toString))
-    def toUserType(m: Message): Child = {
-      val map = Map() ++ (m.map(_.name).toList zip m.toList)
-      new Child(map("name").asInstanceOf[StringField].value,
-        map("property1").asInstanceOf[StringField].value.toBoolean)
-    }
+    def toUserType(m: Message): Child =
+      new Child(m.one("name").stringField.value,
+                m.one("property1").stringField.value.toBoolean)
   }
 
   case class SimpleMessage(name: String, children: List[Child])
@@ -39,9 +37,9 @@ class MessageQueryTestCase {
       List(Field("name", sm.name))
     def toUserType(m: Message): SimpleMessage = {
       val childType = new ChildType()
-      val children = Message.filterMessageFields(m.filter(_ == "child")).map(childType.toUserType(_))
-      val name = m.find(_ == "name").get.asInstanceOf[StringField].value
-      new SimpleMessage(name, children)
+      val children = m.all("child").map(_.messageField.value).map(childType.toUserType(_))
+      val name = m.one("name").stringField.value
+      new SimpleMessage(name, children.toList)
     }
     override def children = Seq(new NestedMember("child", new ChildType()))
   }
