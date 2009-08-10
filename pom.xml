@@ -285,7 +285,21 @@ limitations under the License.
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>4.6</version>
-    </dependency> 
+    </dependency>
+
+    <dependency>
+      <groupId>org.spearce</groupId>
+      <artifactId>jgit</artifactId>
+      <version>0.5.0-SNAPSHOT</version>
+      <scope>compile</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>com.jcraft</groupId>
+          <artifactId>jsch</artifactId>
+         </exclusion>
+      </exclusions>
+    </dependency>
+
   </dependencies>
 
   <repositories>
