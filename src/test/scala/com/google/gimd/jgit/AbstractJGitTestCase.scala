@@ -42,6 +42,9 @@ class AbstractJGitTestCase {
     ow.writeBlob(text.getBytes("UTF-8"))
   }
 
+  protected def writeMessage[U](userType: UserType[U], userObject: U): ObjectId =
+    writeTextContent(userType.toMessageBuffer(userObject).readOnly.toString)
+
   protected def addFiles(files: List[(String, ObjectId)]): ObjectId = {
     val dc = org.spearce.jgit.dircache.DirCache.newInCore
     val builder = dc.builder
