@@ -18,7 +18,7 @@ object MessageQuery {
 
   def simpleQuery[U, W](ut: UserType[W], m: Message, p: Predicate[U]): List[U] = {
     val matched = if (p.isType(ut.userTypeClass)) {
-      val value = ut.toUserType(m).asInstanceOf[U]
+      val value = ut.toUserObject(m).asInstanceOf[U]
 
       if (p.isMatch(value))
         List(value)

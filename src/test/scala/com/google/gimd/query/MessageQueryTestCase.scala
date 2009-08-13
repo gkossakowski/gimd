@@ -25,7 +25,7 @@ class MessageQueryTestCase {
   class ChildType extends UserType[Child] {
     def toMessageBuffer(child: Child) = (new MessageBuffer()) ++
             List(Field("name", child.name), Field("property1", child.property1.toString))
-    def toUserType(m: Message): Child =
+    def toUserObject(m: Message): Child =
       new Child(m.one("name").stringField.value,
                 m.one("property1").stringField.value.toBoolean)
   }
@@ -35,9 +35,9 @@ class MessageQueryTestCase {
   class SimpleMessageType extends UserType[SimpleMessage] {
     def toMessageBuffer(sm: SimpleMessage) = (new MessageBuffer()) ++
       List(Field("name", sm.name))
-    def toUserType(m: Message): SimpleMessage = {
+    def toUserObject(m: Message): SimpleMessage = {
       val childType = new ChildType()
-      val children = m.all("child").map(_.messageField.value).map(childType.toUserType(_))
+      val children = m.all("child").map(_.messageField.value).map(childType.toUserObject(_))
       val name = m.one("name").stringField.value
       new SimpleMessage(name, children.toList)
     }

@@ -14,10 +14,15 @@
 
 package com.google.gimd
 
+/**
+ * UserType[T] defines how to perform conversion between generic Message class and and type T.
+ *
+ * UserType[T] has children method used to define references to other UserTypes.
+ */
 abstract class UserType[T] {
   def userTypeClass: Class[T] = ClassUtils.beanTypeOf(this.getClass, classOf[UserType[T]])
 
-  def toUserType(itr: Message): T
+  def toUserObject(itr: Message): T
   def toMessage(obj: T) = toMessageBuffer(obj).readOnly
   def toMessageBuffer(obj: T): MessageBuffer
   def children: Seq[NestedMember[_]] = Seq()

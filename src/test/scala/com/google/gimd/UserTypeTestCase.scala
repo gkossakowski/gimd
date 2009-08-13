@@ -22,7 +22,7 @@ class UserTypeTestCase {
 
   class MyUserType extends UserType[String] {
     def toMessageBuffer(obj: String): MessageBuffer = new MessageBuffer()
-    def toUserType(itr: Message): String = ""
+    def toUserObject(itr: Message): String = ""
   }
 
   class MyChildUserType extends MyUserType
@@ -30,7 +30,7 @@ class UserTypeTestCase {
   abstract class MyWrongUserTypeBase[T] extends UserType[T]
   class MyWrongUserType extends MyWrongUserTypeBase[String] {
     def toMessageBuffer(obj: String): MessageBuffer = new MessageBuffer()
-    def toUserType(itr: Message): String = ""
+    def toUserObject(itr: Message): String = ""
   }
 
   @Test

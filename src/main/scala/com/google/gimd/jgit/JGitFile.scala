@@ -23,7 +23,7 @@ final class JGitFile[T](val path: String, val blobId: ObjectId, val fileType: Fi
                         val jgitRepository: Repository) extends File[T] {
 
   lazy val message = Parser.parse(new InputStreamReader(blobInputStream, "UTF-8"))
-  lazy val userObject = fileType.userType.toUserType(message)
+  lazy val userObject = fileType.userType.toUserObject(message)
 
   private lazy val blobInputStream = {
     val objectLoader = jgitRepository.openBlob(blobId)
