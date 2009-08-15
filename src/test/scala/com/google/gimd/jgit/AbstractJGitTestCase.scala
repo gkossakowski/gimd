@@ -18,7 +18,7 @@ package com.google.gimd.jgit
 import java.io.{ByteArrayInputStream, IOException, File}
 import org.junit.{After, Before}
 import org.spearce.jgit.lib._
-class AbstractJGitTestCase {
+abstract class AbstractJGitTestCase {
 
   private val repositoryPath = "test-repository/.git"
 
