@@ -21,12 +21,12 @@ class MessageTestCase {
 
   @Test
   def getAll {
-    val list = List(Field("name1", 2), Field("name1", "v1"))
+    val set = Set(Field("name1", 2), Field("name1", "v1"))
     val name0 = Field("name0", 0)
-    val message = Message(List(name0) ++ list ++ List(Field("name2", 3)))
-    assertEquals(List(name0), message.all("name0"))
-    assertEquals(list, message.all("name1"))
-    assertEquals(Nil, message.all("nonExistingName"))
+    val message = Message(List(name0) ++ set ++ List(Field("name2", 3)))
+    assertSameElements(Set(name0), message.all("name0"))
+    assertSameElements(set, message.all("name1"))
+    assertSameElements(Set(), message.all("nonExistingName"))
   }
 
   @Test{val expected = classOf[NoSuchElementException]}
@@ -53,5 +53,8 @@ class MessageTestCase {
     val message = Message(Field("name", "value"))
     assertEquals(Field("name", "value"), message.one("name"))
   }
+
+  private def assertSameElements[T](a: Iterable[T], b: Iterable[T]) =
+    org.junit.Assert.assertEquals(Set(a.toSeq: _*), Set(b.toSeq: _*))
 
 }
