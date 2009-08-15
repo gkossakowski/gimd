@@ -16,20 +16,24 @@ package com.google.gimd.query
 
 object MessageQuery {
 
-  def simpleQuery[U, W](ut: UserType[W], m: Message, p: Predicate[U]): List[U] = {
+  def simpleQuery[U, W](ut: UserType[W], m: Message, p: Predicate[U], parent: Handler,
+                        factory: MessageHandler.Factory): List[(MessageHandler,U)] = {
+    val handler = factory(parent, m)
+
     val matched = if (p.isType(ut.userTypeClass)) {
       val value = ut.toUserObject(m).asInstanceOf[U]
 
       if (p.isMatch(value))
-        List(value)
+        List((handler, value))
       else
         Nil
     } else Nil
 
-    val childMatches = ut.children.flatMap(
-      (nm: NestedMember[_]) => Message.filterMessageFields(m.filter(_.name == nm.name)).
-              flatMap(simpleQuery(nm.userType, _, p))
-    )
+    val childMatches = (for {
+      nm <- ut.children
+      childMessageFields = Message.filterMessageFields(m.all(nm.name))
+      matches = childMessageFields.flatMap(simpleQuery(nm.userType, _, p, handler, factory))
+    } yield matches).flatMap(identity[List[(MessageHandler,U)]])
 
     matched ++ childMatches
   }

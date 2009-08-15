@@ -14,7 +14,7 @@
 
 package com.google.gimd.query
 
-
+import file.{File, FileType}
 import org.junit.Test
 import org.junit.Assert._
 
@@ -22,7 +22,7 @@ class MessageQueryTestCase {
 
   case class Child(name: String, property1: Boolean)
 
-  class ChildType extends UserType[Child] {
+  object ChildType extends UserType[Child] {
     def toMessageBuffer(child: Child) = (new MessageBuffer()) ++
             List(Field("name", child.name), Field("property1", child.property1.toString))
     def toUserObject(m: Message): Child =
@@ -32,17 +32,20 @@ class MessageQueryTestCase {
 
   case class SimpleMessage(name: String, children: List[Child])
 
-  class SimpleMessageType extends UserType[SimpleMessage] {
+  object SimpleMessageType extends UserType[SimpleMessage] {
     def toMessageBuffer(sm: SimpleMessage) = (new MessageBuffer()) ++
       List(Field("name", sm.name))
     def toUserObject(m: Message): SimpleMessage = {
-      val childType = new ChildType()
-      val children = m.all("child").map(_.messageField.value).map(childType.toUserObject(_))
+      val children = m.all("child").map(_.messageField.value).map(ChildType.toUserObject(_))
       val name = m.one("name").stringField.value
       new SimpleMessage(name, children.toList)
     }
-    override def children = Seq(new NestedMember("child", new ChildType()))
+    override def children = Seq(new NestedMember("child", ChildType))
   }
+
+  object MockParentHandler extends Handler
+  case class MockMessageHandler(parent: Handler, message: Message)
+          extends MessageHandler(parent, message)
 
   @Test
   def simpleQuery = {
@@ -51,11 +54,19 @@ class MessageQueryTestCase {
       this.getClass.getResourceAsStream("simpleMessage.gimd")
     )
     val message = gimd.text.Parser.parse(reader)
-    val queryResult = MessageQuery.simpleQuery(new SimpleMessageType(), message,
-      (child: Child) => child.property1 == true)
-    val expectedResult = List(Child("Child1", true), Child("Child3", true),
-                              Child("Child5", true))
-    assertEquals(expectedResult, queryResult)
+    val factory = MockMessageHandler(_, _)
+    val messageHandler = factory(MockParentHandler, message)
+
+    val predicate = (child: Child) => child.property1 == true
+    val queryResult = MessageQuery.simpleQuery(SimpleMessageType, message, predicate,
+      MockParentHandler, factory)
+
+    val expectedChildren = List(Child("Child1", true), Child("Child3", true), Child("Child5", true))
+    val expectedMessages = expectedChildren.map(ChildType.toMessageBuffer(_).readOnly)
+    val handlers = expectedMessages.map(factory(messageHandler, _))
+    val expectedResult = handlers zip expectedChildren
+
+    assertEquals(Set(expectedResult: _*), Set(queryResult: _*))
   }
 
 }
