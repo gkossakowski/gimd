@@ -14,8 +14,4 @@
 
 package com.google.gimd.query
 
-abstract class MessageHandler(parent: Handler, message: Message) extends Handler
-
-object MessageHandler {
-  type Factory = ((Handler, Message) => MessageHandler)
-}
+final case class MessageHandler(parent: Handler, message: Message) extends Handler

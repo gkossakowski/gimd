@@ -16,4 +16,4 @@ package com.google.gimd.query
 
 import file.File
 
-abstract class FileHandler[T](file: File[T]) extends Handler
+final case class FileHandler[T](file: File[T]) extends Handler

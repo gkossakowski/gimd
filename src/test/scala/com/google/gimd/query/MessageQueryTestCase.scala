@@ -44,8 +44,6 @@ class MessageQueryTestCase {
   }
 
   object MockParentHandler extends Handler
-  case class MockMessageHandler(parent: Handler, message: Message)
-          extends MessageHandler(parent, message)
 
   @Test
   def simpleQuery = {
@@ -54,16 +52,15 @@ class MessageQueryTestCase {
       this.getClass.getResourceAsStream("simpleMessage.gimd")
     )
     val message = gimd.text.Parser.parse(reader)
-    val factory = MockMessageHandler(_, _)
-    val messageHandler = factory(MockParentHandler, message)
+    val messageHandler = MessageHandler(MockParentHandler, message)
 
     val predicate = (child: Child) => child.property1 == true
     val queryResult = MessageQuery.simpleQuery(SimpleMessageType, message, predicate,
-      MockParentHandler, factory)
+      MockParentHandler)
 
     val expectedChildren = List(Child("Child1", true), Child("Child3", true), Child("Child5", true))
     val expectedMessages = expectedChildren.map(ChildType.toMessageBuffer(_).readOnly)
-    val handlers = expectedMessages.map(factory(messageHandler, _))
+    val handlers = expectedMessages.map(MessageHandler(messageHandler, _))
     val expectedResult = handlers zip expectedChildren
 
     assertEquals(Set(expectedResult: _*), Set(queryResult: _*))
