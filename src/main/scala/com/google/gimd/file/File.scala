@@ -14,6 +14,9 @@
 
 package com.google.gimd.file
 
+
+import query._
+
 /**
  * File is one of the fundamental concepts in Gimd. Basically File is unit of
  * storage with path associated with it.
@@ -29,5 +32,8 @@ trait File[T] {
   val fileType: FileType[T]
   val message: Message
   val userObject: T
+
+  def query[U](p: Predicate[U]): List[(MessageHandler, U)] =
+    MessageQuery.simpleQuery(fileType.userType, message, p, FileHandler(this))
 
 }
