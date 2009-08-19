@@ -28,7 +28,7 @@ final class JGitFile[T](val path: String, val blobId: ObjectId, val fileType: Fi
   private lazy val blobInputStream = {
     val objectLoader = jgitRepository.openBlob(blobId)
     if (objectLoader == null)
-      throw new JGitDatabaseException("Blob '" + blobId.name + "' does not exist.")
+      throw new JGitProviderException("Blob '" + blobId.name + "' does not exist.")
 
     new ByteArrayInputStream(objectLoader.getCachedBytes)
   }

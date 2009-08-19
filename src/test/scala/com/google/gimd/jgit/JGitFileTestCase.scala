@@ -62,7 +62,7 @@ class JGitFileTestCase extends AbstractJGitTestCase {
     assertEquals(expected, jGitFile.userObject)
   }
 
-  @Test{val expected = classOf[JGitDatabaseException]}
+  @Test{val expected = classOf[JGitProviderException]}
   def testMessageOfNonExistingObject {
     val jGitFile = new JGitFile("test", ObjectId.zeroId, SimpleMessageFileType, repository)
     jGitFile.message

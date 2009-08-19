@@ -21,7 +21,7 @@ import org.spearce.jgit.treewalk.filter.{AndTreeFilter, PathFilter, PathSuffixFi
 import org.spearce.jgit.treewalk.filter.TreeFilter
 import org.spearce.jgit.treewalk.TreeWalk
 
-final class JGitDatabase(val jgitRepository: Repository) extends Database {
+final class JGitProvider(val jgitRepository: Repository) extends DatabaseSpi {
 
   def all[T](fileType: FileType[T]): Iterator[File[T]] = {
     val id = jgitRepository.resolve(Constants.HEAD)

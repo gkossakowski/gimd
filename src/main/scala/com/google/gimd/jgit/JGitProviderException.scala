@@ -12,7 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.google.gimd
+package com.google.gimd.jgit
 
-abstract class DatabaseException(message: String, cause: Throwable)
-        extends Exception(message, cause)
+class JGitProviderException(message: String, cause: Throwable)
+        extends DatabaseSpiException(message, cause) {
+
+  def this(message: String) = this(message, null)
+
+}

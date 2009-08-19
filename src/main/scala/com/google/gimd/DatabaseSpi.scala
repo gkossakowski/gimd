@@ -21,7 +21,7 @@ import query.{Predicate, Handler}
  * Trait that provides all functionality for Gimd to ask specific storage implementation
  * for needed data in an efficient way.
  */
-trait Database {
+trait DatabaseSpi {
 
   /**
    * @return iterator over collection of all Files that conform to passed FileType[T].

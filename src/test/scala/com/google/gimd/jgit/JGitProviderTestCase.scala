@@ -19,7 +19,7 @@ import org.junit.Test
 import org.junit.Assert._
 import org.spearce.jgit.lib.ObjectId
 
-final class JGitDatabaseTestCase extends AbstractJGitTestCase {
+final class JGitProviderTestCase extends AbstractJGitTestCase {
 
   case class SimpleMessage(name: String, value: Int)
 
@@ -51,7 +51,7 @@ final class JGitDatabaseTestCase extends AbstractJGitTestCase {
     )
     commit(files)
 
-    val db = new JGitDatabase(repository)
+    val db = new JGitProvider(repository)
 
     val foundFiles = db.all(SimpleMessageFileType).toList
 
@@ -71,7 +71,7 @@ final class JGitDatabaseTestCase extends AbstractJGitTestCase {
     )
     commit(files)
 
-    val db = new JGitDatabase(repository)
+    val db = new JGitProvider(repository)
 
     val foundFiles = db.all(SimpleMessageFileType).toList
 
@@ -92,7 +92,7 @@ final class JGitDatabaseTestCase extends AbstractJGitTestCase {
     val commitId = createCommit("Test commit", treeId)
     moveHEAD(commitId)
 
-    val db = new JGitDatabase(repository)
+    val db = new JGitProvider(repository)
 
     val foundFiles = db.all(SimpleMessageFileType).toList
     assertEquals(Nil, foundFiles)
