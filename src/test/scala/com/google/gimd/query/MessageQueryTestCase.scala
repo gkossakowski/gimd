@@ -85,13 +85,13 @@ class MessageQueryTestCase {
     MessageQuery.simpleQuery(TreeNodeType, message, p)
   }
 
-  private def handle(message: Message): InnerHandle = MessageHandle(message)
+  private def handle(message: Message): InnerHandle = MessageHandle(message, TreeNodeType)
   private def handle(p: (String, Message)*): InnerHandle = {
     val (name, message) = p(0)
     val field = MessageField(name, message)
     if (p.size == 1) {
-      FieldHandle(field, handle(message))
+      FieldHandle(field, handle(message), TreeNodeType)
     } else
-      FieldHandle(field, handle(p.drop(1): _*))
+      FieldHandle(field, handle(p.drop(1): _*), TreeNodeType)
   }
 }

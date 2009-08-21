@@ -27,7 +27,9 @@ abstract case class RootHandle() extends Handle
 
 /** Handle to a message by itself. */
 final case class MessageHandle(
-  message: Message
+  message: Message,
+  /** userType for Message that this handle is pointing at */
+  userType: UserType[_]
 ) extends InnerHandle
 
 /** Handle to a message stored within a field. */
@@ -37,7 +39,9 @@ final case class FieldHandle(
   // parent, rather than using the object.
   //
   field: MessageField,
-  child: InnerHandle
+  child: InnerHandle,
+  /** userType defined for message which contains given field */
+  userType: UserType[_]
 ) extends InnerHandle
 
 /** Handle to a top level message. */

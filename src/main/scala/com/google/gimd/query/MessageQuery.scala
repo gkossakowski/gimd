@@ -29,7 +29,7 @@ object MessageQuery {
     if (p.isType(ut.userTypeClass)) {
       val obj = ut.toUserObject(m).asInstanceOf[U]
       if (p.isMatch(obj))
-        Iterator.single( (MessageHandle(m), obj) )
+        Iterator.single( (MessageHandle(m, ut), obj) )
       else
         Iterator.empty
     } else
@@ -45,5 +45,5 @@ object MessageQuery {
       if field.isInstanceOf[MessageField]
       f = field.asInstanceOf[MessageField]
       (handle, userObject) <- simpleQuery(member.userType, f.value, p)
-    } yield (FieldHandle(f, handle), userObject)
+    } yield (FieldHandle(f, handle, ut), userObject)
 }
