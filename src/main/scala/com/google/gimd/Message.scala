@@ -22,12 +22,6 @@ object Message {
   val empty: Message = new Message(TreeSet.empty)
   def apply(fields: Iterable[Field]) = empty ++ fields
   def apply(fields: Field*) = new Message(TreeSet(fields: _*))
-
-  def filterMessageFields(xs: Iterable[Field]): List[Message] =
-    xs.flatMap(_ match {
-      case x: MessageField => List(x.value)
-      case _ => Nil
-    }).toList
 }
 
 final class Message(private val fields: Sorted[Field, Field])

@@ -19,51 +19,79 @@ import org.junit.Test
 import org.junit.Assert._
 
 class MessageQueryTestCase {
-
-  case class Child(name: String, property1: Boolean)
-
-  object ChildType extends UserType[Child] {
-    def toMessageBuffer(child: Child) = (new MessageBuffer()) ++
-            List(Field("name", child.name), Field("property1", child.property1.toString))
-    def toUserObject(m: Message): Child =
-      new Child(m.one("name").stringField.value,
-                m.one("property1").stringField.value.toBoolean)
+  case class TreeNode(id: Int, name: String)
+  object TreeNodeType extends UserType[TreeNode] {
+    def toMessageBuffer(n: TreeNode) =
+      new MessageBuffer().
+        add("id", n.id).
+        add("name", n.name)
+    def toUserObject(m: Message): TreeNode =
+      new TreeNode(
+        m.one("id").intField.value,
+        m.one("name").stringField.value
+      )
+    override def children = Seq(new NestedMember("node", TreeNodeType))
   }
 
-  case class SimpleMessage(name: String, children: List[Child])
+  val root = new TreeNode(-1, "a")
+  val child_0 = new TreeNode(0, "a")
+  val child_1 = new TreeNode(1, "b")
+  val child_2 = new TreeNode(2, "a")
 
-  object SimpleMessageType extends UserType[SimpleMessage] {
-    def toMessageBuffer(sm: SimpleMessage) = (new MessageBuffer()) ++
-      List(Field("name", sm.name))
-    def toUserObject(m: Message): SimpleMessage = {
-      val children = m.all("child").map(_.messageField.value).map(ChildType.toUserObject(_))
-      val name = m.one("name").stringField.value
-      new SimpleMessage(name, children.toList)
-    }
-    override def children = Seq(new NestedMember("child", ChildType))
-  }
+  val child_msg0 = TreeNodeType.toMessage(child_0)
+  val child_msg1 = TreeNodeType.toMessage(child_1)
+  val child_msg2 = TreeNodeType.toMessage(child_2)
 
-  object MockParentHandler extends Handler
+  val message = TreeNodeType.toMessageBuffer(root).
+    add("node", child_msg0).
+    add("node", child_msg1).
+    add("node", child_msg2).readOnly
 
   @Test
-  def simpleQuery = {
-    import Predicate.functionLiteral2Predicate
-    val reader = new java.io.InputStreamReader(
-      this.getClass.getResourceAsStream("simpleMessage.gimd")
+  def queryParentWithChildren = {
+    val queryResult = query((n: TreeNode) => n.name == "a")
+
+    val expectedResult = Set(
+      (handle(message), root),
+      (handle(("node", child_msg0)), child_0),
+      (handle(("node", child_msg2)), child_2)
     )
-    val message = gimd.text.Parser.parse(reader)
-    val messageHandler = MessageHandler(MockParentHandler, message)
-
-    val predicate = (child: Child) => child.property1 == true
-    val queryResult = MessageQuery.simpleQuery(SimpleMessageType, message, predicate,
-      MockParentHandler)
-
-    val expectedChildren = List(Child("Child1", true), Child("Child3", true), Child("Child5", true))
-    val expectedMessages = expectedChildren.map(ChildType.toMessageBuffer(_).readOnly)
-    val handlers = expectedMessages.map(MessageHandler(messageHandler, _))
-    val expectedResult = handlers zip expectedChildren
-
-    assertEquals(Set(expectedResult: _*), Set(queryResult: _*))
+    assertEquals(expectedResult, Set(queryResult.toList: _*))
   }
 
+  @Test
+  def queryChildren = {
+    val queryResult = query((n: TreeNode) => n.name == "a" && n.id >= 0)
+
+    val expectedResult = Set(
+      (handle(("node", child_msg0)), child_0),
+      (handle(("node", child_msg2)), child_2)
+    )
+    assertEquals(expectedResult, Set(queryResult.toList: _*))
+  }
+
+  @Test
+  def queryParent = {
+    val queryResult = query((n: TreeNode) => n.name == "a" && n.id < 0)
+
+    val expectedResult = Set(
+      (handle(message), root)
+    )
+    assertEquals(expectedResult, Set(queryResult.toList: _*))
+  }
+
+  private def query(p: (TreeNode) => Boolean) = {
+    import Predicate.functionLiteral2Predicate
+    MessageQuery.simpleQuery(TreeNodeType, message, p)
+  }
+
+  private def handle(message: Message): InnerHandle = MessageHandle(message)
+  private def handle(p: (String, Message)*): InnerHandle = {
+    val (name, message) = p(0)
+    val field = MessageField(name, message)
+    if (p.size == 1) {
+      FieldHandle(field, handle(message))
+    } else
+      FieldHandle(field, handle(p.drop(1): _*))
+  }
 }

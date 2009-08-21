@@ -15,7 +15,7 @@
 package com.google.gimd
 
 import file.{File, FileType}
-import query.{Predicate, Handler}
+import query.{Predicate, Handle}
 
 /**
  * Trait that provides all functionality for Gimd to ask specific storage implementation
@@ -32,9 +32,11 @@ trait DatabaseSpi {
    * Query database for all user objects of type U stored in files of
    * type FileType[W] satisfying predicate p.
    */
-  def query[U,W](ft: FileType[W], p: Predicate[U]): List[(Handler,U)] = {
-    val files = all(ft).toList
-    files.flatMap(_.query(p))
+  def query[U,W](ft: FileType[W], p: Predicate[U]): Iterator[(Handle,U)] = {
+    for {
+      f <- all(ft)
+      r <- f.query(p)
+    } yield r
   }
 
 }

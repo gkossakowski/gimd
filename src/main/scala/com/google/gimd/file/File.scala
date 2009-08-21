@@ -33,7 +33,8 @@ trait File[T] {
   val message: Message
   val userObject: T
 
-  def query[U](p: Predicate[U]): List[(MessageHandler, U)] =
-    MessageQuery.simpleQuery(fileType.userType, message, p, FileHandler(this))
-
+  def query[U](p: Predicate[U]): Iterator[(FileHandle[T], U)] =
+    for {
+      (handle, obj) <- MessageQuery.simpleQuery(fileType.userType, message, p)
+    } yield (FileHandle(this, handle), obj)
 }

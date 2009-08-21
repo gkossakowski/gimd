@@ -15,27 +15,35 @@
 package com.google.gimd.query
 
 object MessageQuery {
-
-  def simpleQuery[U, W](ut: UserType[W], m: Message, p: Predicate[U], parent: Handler):
-    List[(MessageHandler,U)] = {
-    val handler = MessageHandler(parent, m)
-
-    val matched = if (p.isType(ut.userTypeClass)) {
-      val value = ut.toUserObject(m).asInstanceOf[U]
-
-      if (p.isMatch(value))
-        List((handler, value))
-      else
-        Nil
-    } else Nil
-
-    val childMatches = (for {
-      nm <- ut.children
-      childMessageFields = Message.filterMessageFields(m.all(nm.name))
-      matches = childMessageFields.flatMap(simpleQuery(nm.userType, _, p, handler))
-    } yield matches).flatMap(identity[List[(MessageHandler,U)]])
-
-    matched ++ childMatches
+  def simpleQuery[U, W](ut: UserType[W], m: Message, p: Predicate[U]):
+   Iterator[(InnerHandle,U)] = {
+    val children = queryChildren(ut, m, p)
+    val self = querySelf(ut, m, p)
+    if (self.hasNext)
+      self ++ children
+    else
+      children
   }
 
+  private def querySelf[U, W](ut: UserType[W], m: Message, p: Predicate[U]) =
+    if (p.isType(ut.userTypeClass)) {
+      val obj = ut.toUserObject(m).asInstanceOf[U]
+      if (p.isMatch(obj))
+        Iterator.single( (MessageHandle(m), obj) )
+      else
+        Iterator.empty
+    } else
+      Iterator.empty
+
+  private def queryChildren[U, W](ut: UserType[W], m: Message, p: Predicate[U]) =
+    // TODO if ut.children was sorted we could merge against the sorted
+    // property of message and produce a faster join between the two.
+    //
+    for {
+      member <- ut.children.elements
+      field <- m.all(member.name).elements
+      if field.isInstanceOf[MessageField]
+      f = field.asInstanceOf[MessageField]
+      (handle, userObject) <- simpleQuery(member.userType, f.value, p)
+    } yield (FieldHandle(f, handle), userObject)
 }
