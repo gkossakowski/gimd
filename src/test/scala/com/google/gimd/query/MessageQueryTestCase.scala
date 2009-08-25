@@ -52,7 +52,7 @@ class MessageQueryTestCase {
     val queryResult = query((n: TreeNode) => n.name == "a")
 
     val expectedResult = Set(
-      (handle(message), root),
+      (PathHandle(Nil), root),
       (handle(("node", child_msg0)), child_0),
       (handle(("node", child_msg2)), child_2)
     )
@@ -75,7 +75,7 @@ class MessageQueryTestCase {
     val queryResult = query((n: TreeNode) => n.name == "a" && n.id < 0)
 
     val expectedResult = Set(
-      (handle(message), root)
+      (PathHandle(Nil), root)
     )
     assertEquals(expectedResult, Set(queryResult.toList: _*))
   }
@@ -85,13 +85,6 @@ class MessageQueryTestCase {
     MessageQuery.simpleQuery(TreeNodeType, message, p)
   }
 
-  private def handle(message: Message): InnerHandle = MessageHandle(message, TreeNodeType)
-  private def handle(p: (String, Message)*): InnerHandle = {
-    val (name, message) = p(0)
-    val field = MessageField(name, message)
-    if (p.size == 1) {
-      FieldHandle(field, handle(message), TreeNodeType)
-    } else
-      FieldHandle(field, handle(p.drop(1): _*), TreeNodeType)
-  }
+  private def handle(p: (String, Message)*) =
+    PathHandle(p.map { case (name, msg) => (TreeNodeType, MessageField(name, msg)) } toList)
 }

@@ -19,33 +19,23 @@ import com.google.gimd.file.File
 /** Any handle to a stored message. */
 abstract sealed class Handle
 
-/** Handle to a message contained within something else. */
-abstract case class InnerHandle() extends Handle
+/**
+ * <p>Handle to mested message determined by path given by list of
+ * MessageFields.</p>
+ *
+ * <p>In order to get message this handle is pointing at one should use
+ * <code>path.last.value</code></p>
+ *
+ * <p>Path stores also all UserTypes corresponding each to Message that contains
+ * given MessageField.</p>
+ */
+final case class PathHandle(path: List[(UserType[_], MessageField)])
 
-/** Handle to a top-level message, that is not nested. */
-abstract case class RootHandle() extends Handle
-
-/** Handle to a message by itself. */
-final case class MessageHandle(
-  message: Message,
-  /** userType for Message that this handle is pointing at */
-  userType: UserType[_]
-) extends InnerHandle
-
-/** Handle to a message stored within a field. */
-final case class FieldHandle(
-  // TODO We may be able to do a more efficient binding to the field
-  // in the parent by taking advantage of position of field in the
-  // parent, rather than using the object.
-  //
-  field: MessageField,
-  child: InnerHandle,
-  /** userType defined for message which contains given field */
-  userType: UserType[_]
-) extends InnerHandle
-
-/** Handle to a top level message. */
-final case class FileHandle[T](
-  file: File[T],
-  child: InnerHandle
-) extends RootHandle
+/**
+ * <p>Handle to a file that stores top level message.</p>
+ *
+ * <p>The top level message can be accessed using <code>file.message</code>.</p>
+ *
+ * <p>This handle stores also path to a nested message within the top level message.</p>
+ */
+final case class FileHandle[T](file: File[T], path: PathHandle) extends Handle
