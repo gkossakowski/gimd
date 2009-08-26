@@ -21,16 +21,16 @@ import org.junit.Assert._
 class UserTypeTestCase {
 
   class MyUserType extends UserType[String] {
-    def toMessageBuffer(obj: String): MessageBuffer = new MessageBuffer()
     def toUserObject(itr: Message): String = ""
+    def fields = Nil
   }
 
   class MyChildUserType extends MyUserType
 
   abstract class MyWrongUserTypeBase[T] extends UserType[T]
   class MyWrongUserType extends MyWrongUserTypeBase[String] {
-    def toMessageBuffer(obj: String): MessageBuffer = new MessageBuffer()
     def toUserObject(itr: Message): String = ""
+    def fields = Nil
   }
 
   @Test

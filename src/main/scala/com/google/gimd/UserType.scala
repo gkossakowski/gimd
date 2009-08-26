@@ -24,6 +24,11 @@ abstract class UserType[T] {
 
   def toUserObject(itr: Message): T
   def toMessage(obj: T) = toMessageBuffer(obj).readOnly
-  def toMessageBuffer(obj: T): MessageBuffer
+  def toMessageBuffer(obj: T): MessageBuffer = new MessageBuffer ++ fields.map {
+    case FieldSpec(name, f1, f2) => f1(name, f2(obj))
+  }
+  def fields: List[FieldSpec[T, _]]
   def children: Seq[NestedMember[_]] = Seq()
 }
+
+case class FieldSpec[T, F](name: String, f1: (String, F) => Field, f2: T => F)

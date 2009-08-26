@@ -24,13 +24,12 @@ final class JGitProviderTestCase extends AbstractJGitTestCase {
   case class SimpleMessage(name: String, value: Int)
 
   object SimpleMessageType extends UserType[SimpleMessage] {
-    def toMessageBuffer(sm: SimpleMessage) = (new MessageBuffer()) ++
-      List(Field("name", sm.name), Field("value", sm.value))
     def toUserObject(m: Message): SimpleMessage = {
       val name = m.one("name").stringField.value
       val value = m.one("value").intField.value
       SimpleMessage(name, value)
     }
+    def fields = List(FieldSpec("name", StringField, _.name), FieldSpec("value", IntField, _.value))
   }
 
   object SimpleMessageFileType extends FileType[SimpleMessage] {

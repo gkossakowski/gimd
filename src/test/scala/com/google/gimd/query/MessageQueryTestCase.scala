@@ -21,16 +21,13 @@ import org.junit.Assert._
 class MessageQueryTestCase {
   case class TreeNode(id: Int, name: String)
   object TreeNodeType extends UserType[TreeNode] {
-    def toMessageBuffer(n: TreeNode) =
-      new MessageBuffer().
-        add("id", n.id).
-        add("name", n.name)
     def toUserObject(m: Message): TreeNode =
       new TreeNode(
         m.one("id").intField.value,
         m.one("name").stringField.value
       )
     override def children = Seq(new NestedMember("node", TreeNodeType))
+    def fields = List(FieldSpec("id", IntField, _.id), FieldSpec("name", StringField, _.name))
   }
 
   val root = new TreeNode(-1, "a")
