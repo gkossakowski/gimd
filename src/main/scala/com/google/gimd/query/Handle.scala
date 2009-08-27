@@ -16,8 +16,8 @@ package com.google.gimd.query
 
 import com.google.gimd.file.File
 
-/** Any handle to a stored message. */
-abstract sealed class Handle
+/** Any handle to a stored message which corresponds to user object of type T. */
+abstract sealed class Handle[T]
 
 /**
  * <p>Handle to mested message determined by path given by list of
@@ -28,14 +28,20 @@ abstract sealed class Handle
  *
  * <p>Path stores also all UserTypes corresponding each to Message that contains
  * given MessageField.</p>
+ *
+ * <p>For any non-empty path condition T == U should yield true for T,U defined by expression:
+ * PathHandle[T].path.last.userType[U]</p>
  */
-final case class PathHandle(path: List[(UserType[_], MessageField)])
+final case class PathHandle[+T](path: List[(UserType[_], MessageField)])
+
+object PathHandle {
+  val empty = PathHandle(Nil)
+}
 
 /**
- * <p>Handle to a file that stores top level message.</p>
+ * <p>Complete handle consisting of file and pathHandle</p>
  *
  * <p>The top level message can be accessed using <code>file.message</code>.</p>
- *
- * <p>This handle stores also path to a nested message within the top level message.</p>
  */
-final case class FileHandle[T](file: File[T], path: PathHandle) extends Handle
+final case class CompleteHandle[T](file: File[_],
+                                   pathHandle: PathHandle[T]) extends Handle[T]

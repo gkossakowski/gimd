@@ -16,7 +16,7 @@ package com.google.gimd.query
 
 object MessageQuery {
   def simpleQuery[U, W](ut: UserType[W], m: Message, p: Predicate[U]):
-   Iterator[(PathHandle,U)] = {
+   Iterator[(PathHandle[U],U)] = {
     val children = queryChildren(ut, m, p)
     val self = querySelf(ut, m, p)
     if (self.hasNext)
@@ -45,5 +45,5 @@ object MessageQuery {
       if field.isInstanceOf[MessageField]
       f = field.asInstanceOf[MessageField]
       (PathHandle(xs), userObject) <- simpleQuery(member.userType, f.value, p)
-    } yield (PathHandle((ut, f) :: xs), userObject)
+    } yield (PathHandle[U]((ut, f) :: xs), userObject)
 }

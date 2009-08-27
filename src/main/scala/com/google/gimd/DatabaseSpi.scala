@@ -32,7 +32,7 @@ trait DatabaseSpi {
    * Query database for all user objects of type U stored in files of
    * type FileType[W] satisfying predicate p.
    */
-  def query[U,W](ft: FileType[W], p: Predicate[U]): Iterator[(Handle,U)] = {
+  def query[U,W](ft: FileType[W], p: Predicate[U]): Iterator[(Handle[U],U)] = {
     for {
       f <- all(ft)
       r <- f.query(p)
