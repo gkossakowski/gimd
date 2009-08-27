@@ -30,15 +30,17 @@ object ClassUtils {
     else
       throw cannotGuessType(base)
 
-  private def beanTypeOf[Q,R](base: Class[Q], t: Type): Class[R] =
-    t match {
+  private def beanTypeOf[Q,R](base: Class[Q], t: Type): Class[R] = {
+    val c = t match {
       case t: ParameterizedType =>
         t.getActualTypeArguments()(0) match {
-          case c: Class[R] => c
+          case c: Class[_] => c
           case wrongType   => throw cannotGuessType(base)
         }
       case wrongType => throw cannotGuessType(base)
     }
+    c.asInstanceOf[Class[R]]
+  }
 
   private def cannotGuessType[Q](base: Class[Q]): IllegalStateException =
     new IllegalStateException("Cannot guess bean type wanted by " + base.getName)
