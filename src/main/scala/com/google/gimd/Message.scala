@@ -24,7 +24,9 @@ object Message {
   def apply(fields: Field*) = new Message(TreeSet(fields: _*))
 }
 
-final class Message(private val fields: Sorted[Field, Field])
+//TODO Message should allow to subclass itself only in gimd package but I don't know
+//how to do that right now
+class Message(private val fields: Sorted[Field, Field])
         extends Ordered[Message] with Sorted[Field, Field] {
 
   override def equals(that: Any) = that match {
