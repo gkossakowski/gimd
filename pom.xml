@@ -291,7 +291,11 @@ limitations under the License.
     <dependency>
       <groupId>org.spearce</groupId>
       <artifactId>jgit</artifactId>
-      <version>0.5.0-83-g93a581d</version>
+      <!-- FIXME: Gimd requires SNAPSHOT version which is in a fact
+           git://repo.or.cz/jgit/spearce.git minor-bugs branch of JGit.
+           The version should be changed back to released one once there is a release incorporating
+           minor-bugs branch. -->
+      <version>0.5.0-SNAPSHOT</version>
       <scope>compile</scope>
     </dependency>
 
