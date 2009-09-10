@@ -45,7 +45,7 @@ class JGitFileTestCase extends AbstractJGitTestCase {
 
     val blobId = writeTextContent(expected.toString)
 
-    val jGitFile = new JGitFile("test", blobId, SimpleMessageFileType, repository)
+    val jGitFile = new JGitFile("test", blobId, SimpleMessageFileType, masterBranch)
     assertEquals(expected, jGitFile.message)
   }
 
@@ -56,13 +56,13 @@ class JGitFileTestCase extends AbstractJGitTestCase {
 
     val blobId = writeTextContent(message.toString)
 
-    val jGitFile = new JGitFile("test", blobId, SimpleMessageFileType, repository)
+    val jGitFile = new JGitFile("test", blobId, SimpleMessageFileType, masterBranch)
     assertEquals(expected, jGitFile.userObject)
   }
 
   @Test{val expected = classOf[JGitDatabaseException]}
   def testMessageOfNonExistingObject {
-    val jGitFile = new JGitFile("test", ObjectId.zeroId, SimpleMessageFileType, repository)
+    val jGitFile = new JGitFile("test", ObjectId.zeroId, SimpleMessageFileType, masterBranch)
     jGitFile.message
   }
 }

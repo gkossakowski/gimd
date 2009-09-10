@@ -20,10 +20,10 @@ import org.spearce.jgit.revwalk.RevCommit
 import org.spearce.jgit.treewalk.filter.{PathFilter, PathSuffixFilter, AndTreeFilter, TreeFilter}
 import org.spearce.jgit.treewalk.TreeWalk
 
-final class JGitSnapshot(val repository: Repository, val commit: RevCommit) extends Snapshot {
+final class JGitSnapshot(val branch: JGitBranch, val commit: RevCommit) extends Snapshot {
 
   def all[T](fileType: FileType[T]): Iterator[File[T]] = {
-    val treeWalk = new TreeWalk(repository)
+    val treeWalk = new TreeWalk(branch.repository)
     treeWalk.reset(commit.getTree)
     treeWalk.setRecursive(true)
     treeWalk.setFilter(treeFilter(fileType))
@@ -35,7 +35,7 @@ final class JGitSnapshot(val repository: Repository, val commit: RevCommit) exte
         if (!hasNext)
           throw new NoSuchElementException
         val result =
-          new JGitFile(treeWalk.getPathString, treeWalk.getObjectId(0), fileType, repository)
+          new JGitFile(treeWalk.getPathString, treeWalk.getObjectId(0), fileType, branch)
         doesHasNext = treeWalk.next
         result
       }

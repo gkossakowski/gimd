@@ -21,6 +21,6 @@ import org.spearce.jgit.lib.Repository
  *
  * @see JGitDatabase
  */
-class JGitMergeRetriesExceededException(override val repository: Repository, val retries: Int)
-        extends JGitDatabaseException(repository, ("Tried to rebase transaction %1s times and " +
+class JGitMergeRetriesExceededException(override val branch: JGitBranch, val retries: Int)
+        extends JGitDatabaseException(branch, ("Tried to rebase transaction %1s times and " +
                 "failed to merge changes successfuly. Aborting.").format(retries))

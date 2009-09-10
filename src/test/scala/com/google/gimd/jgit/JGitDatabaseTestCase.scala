@@ -52,7 +52,7 @@ final class JGitDatabaseTestCase extends AbstractJGitTestCase {
     )
     commit(files)
 
-    val db = new JGitDatabase(repository)
+    val db = new JGitDatabase(masterBranch)
 
     val foundFiles = db.latestSnapshot.all(SimpleMessageFileType).toList
 
@@ -72,7 +72,7 @@ final class JGitDatabaseTestCase extends AbstractJGitTestCase {
     )
     commit(files)
 
-    val db = new JGitDatabase(repository)
+    val db = new JGitDatabase(masterBranch)
 
     val foundFiles = db.latestSnapshot.all(SimpleMessageFileType).toList
 
@@ -89,11 +89,11 @@ final class JGitDatabaseTestCase extends AbstractJGitTestCase {
     entry.setObjectId(writeTextContent("text content"))
     builder.add(entry)
     builder.finish()
-    val treeId = dc.writeTree(new org.spearce.jgit.lib.ObjectWriter(repository))
+    val treeId = dc.writeTree(new org.spearce.jgit.lib.ObjectWriter(masterBranch.repository))
     val commitId = createCommit("Test commit", treeId)
-    moveHEAD(commitId)
+    moveMaster(commitId)
 
-    val db = new JGitDatabase(repository)
+    val db = new JGitDatabase(masterBranch)
 
     val foundFiles = db.latestSnapshot.all(SimpleMessageFileType).toList
     assertEquals(Nil, foundFiles)
@@ -112,7 +112,7 @@ final class JGitDatabaseTestCase extends AbstractJGitTestCase {
     )
     commit(files)
 
-    val db = new JGitDatabase(repository)
+    val db = new JGitDatabase(masterBranch)
 
     db.modify { snapshot =>
       val sms = snapshot.query(SimpleMessageFileType, (sm: SimpleMessage) => sm.name == "second")
@@ -140,7 +140,7 @@ final class JGitDatabaseTestCase extends AbstractJGitTestCase {
     )
     commit(files)
 
-    val db = new JGitDatabase(repository)
+    val db = new JGitDatabase(masterBranch)
 
     db.modify { snapshot =>
       val sms = snapshot.query(SimpleMessageFileType, (sm: SimpleMessage) => sm.name == "second")
@@ -158,7 +158,7 @@ final class JGitDatabaseTestCase extends AbstractJGitTestCase {
   private def commit(files: List[(String, ObjectId)]) {
     val treeId = addFiles(files)
     val commitId = createCommit("Test", treeId)
-    moveHEAD(commitId)
+    moveMaster(commitId)
   }
 
 }

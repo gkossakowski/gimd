@@ -14,11 +14,9 @@
 
 package com.google.gimd.jgit
 
-case class JGitDatabaseException(val branch: JGitBranch,
-                                 val msg: String,
-                                 val cause: Throwable) extends GimdException(msg, cause) {
+import org.spearce.jgit.lib.Repository
 
-  def this(branch: JGitBranch, msg: String) = this(branch, msg, null)
-
-  def this(branch: JGitBranch, cause: Throwable) = this(branch, null, cause)
-}
+final class InvalidJGitBranchNameException(val repository: Repository, name: String)
+        extends JGitDatabaseException(JGitBranch(repository, ""), //not sure if creating artificial
+                                                                  //branch istance is a good idea
+                                      "'%1s' is invalid branch name".format(name))

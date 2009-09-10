@@ -14,23 +14,26 @@
 
 package com.google.gimd.jgit
 
-
 import java.io.{ByteArrayInputStream, IOException, File}
 import org.junit.{After, Before}
 import org.spearce.jgit.lib._
+
 abstract class AbstractJGitTestCase {
 
   private val repositoryPath = "test-repository/.git"
 
-  var repository: Repository = null
+  protected val masterRef = Constants.R_HEADS + Constants.MASTER
+
+  protected var masterBranch: JGitBranch = null
 
   @Before protected def createRepository {
     val file = new File(repositoryPath)
-    repository = new Repository(file)
+    val repository = new Repository(file)
     if (file.exists)
       throw new IOException("Repository already exists: " + file)
     file.mkdirs()
     repository.create()
+    masterBranch = JGitBranch(repository, masterRef)
   }
 
   @After protected def removeRepository {
@@ -38,7 +41,7 @@ abstract class AbstractJGitTestCase {
   }
 
   protected def writeTextContent(text: String): ObjectId = {
-    val ow = new ObjectWriter(repository)
+    val ow = new ObjectWriter(masterBranch.repository)
     ow.writeBlob(text.getBytes("UTF-8"))
   }
 
@@ -55,11 +58,11 @@ abstract class AbstractJGitTestCase {
       builder.add(entry)
     }
     builder.finish()
-    dc.writeTree(new ObjectWriter(repository))
+    dc.writeTree(new ObjectWriter(masterBranch.repository))
   }
 
   protected def createCommit(message: String, treeId: ObjectId): ObjectId = {
-    val commit = new Commit(repository, Array())
+    val commit = new Commit(masterBranch.repository, Array())
     val person = new PersonIdent("A U Thor", "author@example.com")
     commit.setAuthor(person)
     commit.setCommitter(person)
@@ -69,8 +72,8 @@ abstract class AbstractJGitTestCase {
     commit.getCommitId
   }
 
-  protected def moveHEAD(commitId: ObjectId) {
-    val refUpdate = repository.updateRef(Constants.HEAD)
+  protected def moveMaster(commitId: ObjectId) {
+    val refUpdate = masterBranch.repository.updateRef(masterRef)
     refUpdate.setNewObjectId(commitId)
     refUpdate.forceUpdate()
   }

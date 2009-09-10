@@ -24,7 +24,7 @@ import org.spearce.jgit.lib.RefUpdate.Result
 import org.spearce.jgit.dircache.{DirCache, DirCacheEditor, DirCacheEntry}
 import org.spearce.jgit.revwalk.{RevCommit, RevTree, RevWalk}
 
-final class JGitDatabase(repository: Repository) extends Database {
+final class JGitDatabase(branch: JGitBranch) extends Database {
 
   /**
    * The maximal number of merge/transaction rebase retries.
@@ -42,12 +42,14 @@ final class JGitDatabase(repository: Repository) extends Database {
    */
   private val MERGE_RETRIES = 10
 
+  private val repository = branch.repository
+
   def latestSnapshot: JGitSnapshot = {
     try {
-      val id = repository.resolve(Constants.HEAD)
-      new JGitSnapshot(repository, new RevWalk(repository).parseCommit(id))
+      val id = repository.resolve(branch.name)
+      new JGitSnapshot(branch, new RevWalk(repository).parseCommit(id))
     } catch {
-      case e: IOException => throw new JGitDatabaseException(repository, e)
+      case e: IOException => throw new JGitDatabaseException(branch, e)
     }
   }
 
@@ -56,37 +58,37 @@ final class JGitDatabase(repository: Repository) extends Database {
       retry(MERGE_RETRIES) {
         val snapshot = latestSnapshot
         val dbModification = modification(snapshot)
-        applyModification(dbModification, Constants.HEAD, snapshot.commit)
+        applyModification(dbModification, snapshot.commit)
       }
     } catch {
-      case e: IOException => throw new JGitDatabaseException(repository, e)
+      case e: IOException => throw new JGitDatabaseException(branch, e)
     }
 
     if (!successful)
-      throw new JGitMergeRetriesExceededException(repository, MERGE_RETRIES)
+      throw new JGitMergeRetriesExceededException(branch, MERGE_RETRIES)
   }
 
-  def applyModification(modification: DatabaseModification, branch: String, onto: RevCommit):
+  def applyModification(modification: DatabaseModification, onto: RevCommit):
     Boolean = {
     val treeId = writeMessages(modification, onto.getTree)
     val commitId = createCommit(treeId, onto)
-    val result = updateRef(branch, onto, commitId)
+    val result = updateRef(onto, commitId)
     result match {
       //there was no change to database since onto commit so changes were applied cleanly
       case Result.FAST_FORWARD => true
       //if there was a change since onto commit update gets rejected. Still it might be that change
       //did not affected files we are trying to modify. Thus we are trying merging both changes.
-      case Result.REJECTED => tryMerging(branch, commitId)
+      case Result.REJECTED => tryMerging(commitId)
       //TODO: There should be a special treatment of LOCK_FAILURE case but it's low-priority task
       //the idea is to not try merging if just JGit fails to obtain lock for given reference
       case _ =>
-        throw new JGitDatabaseException(repository,
+        throw new JGitDatabaseException(branch,
                                         "RefUpdate returned unexpected result: %1s.".format(result))
     }
   }
 
-  private def updateRef(name: String, oldCommit: ObjectId, newCommit: ObjectId): Result = {
-    val refUpdate = repository.updateRef(name)
+  private def updateRef(oldCommit: ObjectId, newCommit: ObjectId): Result = {
+    val refUpdate = repository.updateRef(branch.name)
     refUpdate.setExpectedOldObjectId(oldCommit)
     refUpdate.setNewObjectId(newCommit)
     refUpdate.update()
@@ -130,20 +132,20 @@ final class JGitDatabase(repository: Repository) extends Database {
     dirCache.writeTree(objectWriter)
   }
 
-  private def merge(branch: String, commitToBeMerged: ObjectId): Boolean = {
-    val baseCommit = repository.resolve(branch)
+  private def merge(commitToBeMerged: ObjectId): Boolean = {
+    val baseCommit = repository.resolve(branch.name)
     val merger = MergeStrategy.SIMPLE_TWO_WAY_IN_CORE.newMerger(repository)
     if (merger.merge(baseCommit, commitToBeMerged)) {
       val treeId = merger.getResultTreeId
       val mergeCommit = createCommit(treeId, baseCommit, commitToBeMerged)
-      val result = updateRef(branch, baseCommit, mergeCommit)
+      val result = updateRef(baseCommit, mergeCommit)
       Result.FAST_FORWARD == result
     } else
       false
   }
 
-  private def tryMerging(branch: String, commitToBeMerged: ObjectId) =
-    retry(MERGE_RETRIES)(merge(branch, commitToBeMerged))
+  private def tryMerging(commitToBeMerged: ObjectId) =
+    retry(MERGE_RETRIES)(merge(commitToBeMerged))
 
   private def retry(howManyTimes: Int)(what: => Boolean): Boolean =
     if (howManyTimes > 0)

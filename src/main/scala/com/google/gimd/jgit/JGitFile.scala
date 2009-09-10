@@ -20,15 +20,15 @@ import org.spearce.jgit.lib.{ObjectId, Repository}
 import text.Parser
 
 final class JGitFile[T](val path: String, val blobId: ObjectId, val fileType: FileType[T],
-                        val repository: Repository) extends File[T] {
+                        val branch: JGitBranch) extends File[T] {
 
   lazy val message = Parser.parse(new InputStreamReader(blobInputStream, "UTF-8"))
   lazy val userObject = fileType.userType.toUserObject(message)
 
   private lazy val blobInputStream = {
-    val objectLoader = repository.openBlob(blobId)
+    val objectLoader = branch.repository.openBlob(blobId)
     if (objectLoader == null)
-      throw new JGitDatabaseException(repository, "Blob '" + blobId.name + "' does not exist.")
+      throw new JGitDatabaseException(branch, "Blob '" + blobId.name + "' does not exist.")
 
     new ByteArrayInputStream(objectLoader.getCachedBytes)
   }

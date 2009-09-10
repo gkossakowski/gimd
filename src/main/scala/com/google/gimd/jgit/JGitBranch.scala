@@ -14,11 +14,17 @@
 
 package com.google.gimd.jgit
 
-case class JGitDatabaseException(val branch: JGitBranch,
-                                 val msg: String,
-                                 val cause: Throwable) extends GimdException(msg, cause) {
+import org.spearce.jgit.lib.Repository
 
-  def this(branch: JGitBranch, msg: String) = this(branch, msg, null)
-
-  def this(branch: JGitBranch, cause: Throwable) = this(branch, null, cause)
+/**
+ * <p>Class that stores information about branch which consists of name of branch and repository
+ * where that branch is stored.</p>
+ *
+ * @throws InvalidJGitBranchNameException if supplied <code>name</code> does not pass
+ *         <code>Repository.isValidRefName</code> test.
+ */
+@throws(classOf[InvalidJGitBranchNameException])
+final case class JGitBranch(repository: Repository, name: String) {
+   if (!Repository.isValidRefName(name))
+     throw new InvalidJGitBranchNameException(repository, name)
 }
