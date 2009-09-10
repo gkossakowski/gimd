@@ -14,23 +14,16 @@
 
 package com.google.gimd.jgit
 
-import file.{FileType, File}
-import org.spearce.jgit.lib._
-import org.spearce.jgit.revwalk.{RevCommit, RevWalk}
-import org.spearce.jgit.treewalk.filter.{AndTreeFilter, PathFilter, PathSuffixFilter}
-import org.spearce.jgit.treewalk.filter.TreeFilter
+import file.{File, FileType}
+import org.spearce.jgit.lib.{Repository, FileMode}
+import org.spearce.jgit.revwalk.RevCommit
+import org.spearce.jgit.treewalk.filter.{PathFilter, PathSuffixFilter, AndTreeFilter, TreeFilter}
 import org.spearce.jgit.treewalk.TreeWalk
 
-final class JGitProvider(val jgitRepository: Repository) extends DatabaseSpi {
+final class JGitSnapshot(val repository: Repository, val commit: RevCommit) extends Snapshot {
 
   def all[T](fileType: FileType[T]): Iterator[File[T]] = {
-    val id = jgitRepository.resolve(Constants.HEAD)
-    val rw = new RevWalk(jgitRepository)
-    all(fileType, rw.parseCommit(id))
-  }
-
-  private def all[T](fileType: FileType[T], commit: RevCommit): Iterator[File[T]] = {
-    val treeWalk = new TreeWalk(jgitRepository)
+    val treeWalk = new TreeWalk(repository)
     treeWalk.reset(commit.getTree)
     treeWalk.setRecursive(true)
     treeWalk.setFilter(treeFilter(fileType))
@@ -42,7 +35,7 @@ final class JGitProvider(val jgitRepository: Repository) extends DatabaseSpi {
         if (!hasNext)
           throw new NoSuchElementException
         val result =
-          new JGitFile(treeWalk.getPathString, treeWalk.getObjectId(0), fileType, jgitRepository)
+          new JGitFile(treeWalk.getPathString, treeWalk.getObjectId(0), fileType, repository)
         doesHasNext = treeWalk.next
         result
       }

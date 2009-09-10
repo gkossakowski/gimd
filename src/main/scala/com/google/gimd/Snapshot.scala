@@ -17,26 +17,25 @@ package com.google.gimd
 import file.{File, FileType}
 import query.{Predicate, Handle}
 
-/**
- * Trait that provides all functionality for Gimd to ask specific storage implementation
- * for needed data in an efficient way.
- */
-trait DatabaseSpi {
-
-  /**
-   * @return iterator over collection of all Files that conform to passed FileType[T].
-   */
-  def all[T](fileType: FileType[T]): Iterator[File[T]]
+trait Snapshot {
 
   /**
    * Query database for all user objects of type U stored in files of
    * type FileType[W] satisfying predicate p.
+   *
+   * @throws GimdException
    */
+  @throws(classOf[GimdException])
   def query[U,W](ft: FileType[W], p: Predicate[U]): Iterator[(Handle[U],U)] = {
     for {
       f <- all(ft)
       r <- f.query(p)
     } yield r
   }
+
+  /**
+   * @return iterator over collection of all Files that conform to passed FileType[T].
+   */
+  protected def all[T](fileType: FileType[T]): Iterator[File[T]]
 
 }

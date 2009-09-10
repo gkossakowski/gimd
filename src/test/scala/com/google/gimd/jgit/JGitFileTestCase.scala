@@ -14,7 +14,6 @@
 
 package com.google.gimd.jgit
 
-
 import file.FileType
 import junit.framework.Assert._
 import org.junit.Test
@@ -61,7 +60,7 @@ class JGitFileTestCase extends AbstractJGitTestCase {
     assertEquals(expected, jGitFile.userObject)
   }
 
-  @Test{val expected = classOf[JGitProviderException]}
+  @Test{val expected = classOf[JGitDatabaseException]}
   def testMessageOfNonExistingObject {
     val jGitFile = new JGitFile("test", ObjectId.zeroId, SimpleMessageFileType, repository)
     jGitFile.message

@@ -14,9 +14,14 @@
 
 package com.google.gimd.jgit
 
-class JGitProviderException(message: String, cause: Throwable)
-        extends DatabaseSpiException(message, cause) {
 
-  def this(message: String) = this(message, null)
+import org.spearce.jgit.lib.Repository
 
+class JGitDatabaseException(val repository: Repository,
+                            val msg: String,
+                            val cause: Throwable) extends GimdException(msg, cause) {
+
+  def this(repository: Repository, msg: String) = this(repository, msg, null)
+
+  def this(repository: Repository, cause: Throwable) = this(repository, null, cause)
 }

@@ -15,11 +15,13 @@
 package com.google.gimd.jgit
 
 import file.{File, FileType}
+import modification.DatabaseModification
 import org.junit.Test
 import org.junit.Assert._
-import org.spearce.jgit.lib.ObjectId
+import org.spearce.jgit.lib.{Constants, ObjectId}
+import query.Predicate
 
-final class JGitProviderTestCase extends AbstractJGitTestCase {
+final class JGitDatabaseTestCase extends AbstractJGitTestCase {
 
   case class SimpleMessage(name: String, value: Int)
 
@@ -50,9 +52,9 @@ final class JGitProviderTestCase extends AbstractJGitTestCase {
     )
     commit(files)
 
-    val db = new JGitProvider(repository)
+    val db = new JGitDatabase(repository)
 
-    val foundFiles = db.all(SimpleMessageFileType).toList
+    val foundFiles = db.latestSnapshot.all(SimpleMessageFileType).toList
 
     val expected = List("sm/first.sm", "sm/second.sm")
     assertEquals(expected, foundFiles.map(_.path))
@@ -70,9 +72,9 @@ final class JGitProviderTestCase extends AbstractJGitTestCase {
     )
     commit(files)
 
-    val db = new JGitProvider(repository)
+    val db = new JGitDatabase(repository)
 
-    val foundFiles = db.all(SimpleMessageFileType).toList
+    val foundFiles = db.latestSnapshot.all(SimpleMessageFileType).toList
 
     val expected = List(first, second)
     assertEquals(expected, foundFiles.map(_.userObject))
@@ -91,10 +93,66 @@ final class JGitProviderTestCase extends AbstractJGitTestCase {
     val commitId = createCommit("Test commit", treeId)
     moveHEAD(commitId)
 
-    val db = new JGitProvider(repository)
+    val db = new JGitDatabase(repository)
 
-    val foundFiles = db.all(SimpleMessageFileType).toList
+    val foundFiles = db.latestSnapshot.all(SimpleMessageFileType).toList
     assertEquals(Nil, foundFiles)
+  }
+
+  @Test
+  def modifySimpleMessages {
+    import query.Predicate.functionLiteral2Predicate
+
+    val first = SimpleMessage("first", 1)
+    val second = SimpleMessage("second", 2)
+
+    val files = List(
+      ("sm/first.sm", writeMessage(SimpleMessageType, first)),
+      ("sm/second.sm", writeMessage(SimpleMessageType, second))
+    )
+    commit(files)
+
+    val db = new JGitDatabase(repository)
+
+    db.modify { snapshot =>
+      val sms = snapshot.query(SimpleMessageFileType, (sm: SimpleMessage) => sm.name == "second")
+      sms.foldLeft(DatabaseModification.empty) {
+        case (m, (h, sm)) => m.modify(h, SimpleMessage(sm.name, sm.value+1))
+      }
+    }
+
+    val foundFiles = db.latestSnapshot.all(SimpleMessageFileType).toList
+
+    val expected = List(first, SimpleMessage(second.name, second.value+1))
+    assertEquals(expected, foundFiles.map(_.userObject))
+  }
+
+  @Test
+  def deleteSimpleMessage {
+    import query.Predicate.functionLiteral2Predicate
+
+    val first = SimpleMessage("first", 1)
+    val second = SimpleMessage("second", 2)
+
+    val files = List(
+      ("sm/first.sm", writeMessage(SimpleMessageType, first)),
+      ("sm/second.sm", writeMessage(SimpleMessageType, second))
+    )
+    commit(files)
+
+    val db = new JGitDatabase(repository)
+
+    db.modify { snapshot =>
+      val sms = snapshot.query(SimpleMessageFileType, (sm: SimpleMessage) => sm.name == "second")
+      sms.foldLeft(DatabaseModification.empty) {
+        case (m, (h, sm)) => m.remove(h)
+      }
+    }
+
+    val foundFiles = db.latestSnapshot.all(SimpleMessageFileType).toList
+
+    val expected = List(first)
+    assertEquals(expected, foundFiles.map(_.userObject))
   }
 
   private def commit(files: List[(String, ObjectId)]) {
