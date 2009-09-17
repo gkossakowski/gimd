@@ -36,6 +36,7 @@ class JGitFileTestCase extends AbstractJGitTestCase {
     val pathPrefix = None
     val pathSuffix = None
     val userType = SimpleMessageType
+    def name(m: Message) = m.one("name").stringField.value
   }
 
   @Test

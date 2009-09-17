@@ -35,9 +35,10 @@ final class JGitDatabaseTestCase extends AbstractJGitTestCase {
   }
 
   object SimpleMessageFileType extends FileType[SimpleMessage] {
-    val pathPrefix = Some("sm")
+    val pathPrefix = Some("sm/")
     val pathSuffix = Some(".sm")
     val userType = SimpleMessageType
+    def name(m: Message) = m.one("name").stringField.value
   }
 
   @Test

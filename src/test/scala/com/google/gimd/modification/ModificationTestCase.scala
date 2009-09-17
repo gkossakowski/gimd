@@ -35,9 +35,10 @@ final class ModificationTestCase {
     def fields = List(FieldSpec("id", IntField, _.id), FieldSpec("name", StringField, _.name))
   }
   object MockFileType extends FileType[TreeNode] {
-    def pathPrefix = None
-    def pathSuffix = None
-    def userType = TreeNodeType
+    val pathPrefix = None
+    val pathSuffix = None
+    val userType = TreeNodeType
+    def name(m: Message) = m.one("id").stringField.value
   }
   case class MockFile(message: Message) extends File[TreeNode] {
     val path = ""

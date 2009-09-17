@@ -20,19 +20,37 @@ package com.google.gimd.file
  */
 abstract class FileType[T] {
 
+  //TODO: This assertion should be checked but for now it has to be commented out as there is some
+  //TODO: problem with initialization order. NPEs is being thrown because assertion is being checked
+  //TODO: before subclass initializes pathPrefix field. Need to figure out why this happens.
+  //assert(pathPrefix.map(_ endsWith "/").getOrElse(true))
+
   /**
    * prefix of File's path or None if there's no common prefix.
+   * For Some(x) condition x.last == "/" must be satisfied.
    */
-  def pathPrefix: Option[String]
+  val pathPrefix: Option[String]
 
   /**
    * suffix of File's path or None if there's no common suffix.
    */
-  def pathSuffix: Option[String]
+  val pathSuffix: Option[String]
+
+  /**
+   * Function that maps given Message to a name of a file where Message can be stored.
+   */
+  protected def name(m: Message): String
+
+  /**
+   * Returns full path of a file where given Message can be stored.
+   *
+   * @see #name(m: Message)
+   */
+  final def path(m: Message) = pathPrefix.getOrElse("") + name(m) + pathSuffix.getOrElse("")
 
   /**
    * Type of information that File stores.
    */
-  def userType: UserType[T]
+  val userType: UserType[T]
 
 }
