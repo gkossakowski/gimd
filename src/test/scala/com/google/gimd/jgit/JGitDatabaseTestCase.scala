@@ -101,17 +101,17 @@ final class JGitDatabaseTestCase extends AbstractJGitTestCase {
   }
 
   @Test
-  def modifySimpleMessages {
+  def modifySimpleMessagesWithoutMovingFiles {
     import query.Predicate.functionLiteral2Predicate
 
     val first = SimpleMessage("first", 1)
     val second = SimpleMessage("second", 2)
 
-    val files = List(
-      ("sm/first.sm", writeMessage(SimpleMessageType, first)),
-      ("sm/second.sm", writeMessage(SimpleMessageType, second))
-    )
-    commit(files)
+    val paths = List("sm/first.sm", "sm/second.sm")
+
+    val blobIds = List(writeMessage(SimpleMessageType, first),
+                       writeMessage(SimpleMessageType, second))
+    commit(paths zip blobIds)
 
     val db = new JGitDatabase(masterBranch)
 
@@ -124,8 +124,41 @@ final class JGitDatabaseTestCase extends AbstractJGitTestCase {
 
     val foundFiles = db.latestSnapshot.all(SimpleMessageFileType).toList
 
-    val expected = List(first, SimpleMessage(second.name, second.value+1))
-    assertEquals(expected, foundFiles.map(_.userObject))
+    val expectedMsgs = List(first, SimpleMessage(second.name, second.value+1))
+    assertEquals(expectedMsgs, foundFiles.map(_.userObject))
+    assertEquals(paths, foundFiles.map(_.path))
+  }
+
+  @Test
+  def modifySimpleMessagesWithMovingFiles {
+    import query.Predicate.functionLiteral2Predicate
+
+    val first = SimpleMessage("first", 1)
+    val second = SimpleMessage("second", 2)
+
+    val paths = List("sm/first.sm", "sm/second.sm")
+
+    val blobIds = List(writeMessage(SimpleMessageType, first),
+                       writeMessage(SimpleMessageType, second))
+    commit(paths zip blobIds)
+
+    val db = new JGitDatabase(masterBranch)
+
+    val third = SimpleMessage("third", 3)
+
+    db.modify { snapshot =>
+      val sms = snapshot.query(SimpleMessageFileType, (sm: SimpleMessage) => sm.name == "second")
+      sms.foldLeft(DatabaseModification.empty) {
+        case (m, (h, sm)) => m.modify(h, third)
+      }
+    }
+
+    val foundFiles = db.latestSnapshot.all(SimpleMessageFileType).toList
+
+    val expectedMsgs = List(first, third)
+    val expectedPaths = List("sm/first.sm", "sm/third.sm")
+    assertEquals(expectedMsgs, foundFiles.map(_.userObject))
+    assertEquals(expectedPaths, foundFiles.map(_.path))
   }
 
   @Test

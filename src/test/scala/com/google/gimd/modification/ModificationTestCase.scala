@@ -67,7 +67,8 @@ final class ModificationTestCase {
     val child_3 = TreeNode(3, "a")
     val child_msg3 = TreeNodeType.toMessage(child_3)
     val modification = DatabaseModification.empty.insert(handle, nestedMember, child_3)
-    val newTopMessage = modification.reduce(file).get
+    val (modFiles, _) = modification.reduce
+    val newTopMessage = modFiles(file).get
     val expectedTopMessage = TreeNodeType.toMessageBuffer(root).
                               add("node", child_msg0).
                               add("node", child_msg1).
@@ -77,13 +78,22 @@ final class ModificationTestCase {
   }
 
   @Test
+  def insertNewFile {
+    val modification = DatabaseModification.empty.insertFile(MockFileType, root)
+    val (_, newFiles) = modification.reduce
+    val root_msg = TreeNodeType.toMessage(root)
+    assertEquals(List((MockFileType, root_msg)), newFiles)
+  }
+
+  @Test
   def insertUnderNonEmptyPath {
     val file = MockFile(message)
     val handle = CompleteHandle(file, path(child_msg1))
     val child_3 = TreeNode(3, "a")
     val child_msg3 = TreeNodeType.toMessage(child_3)
     val modification = DatabaseModification.empty.insert(handle, nestedMember, child_3)
-    val newTopMessage = modification.reduce(file).get
+    val (modFiles, _) = modification.reduce
+    val newTopMessage = modFiles(file).get
     val expectedTopMessage = TreeNodeType.toMessageBuffer(root).
                               add("node", child_msg0).
                               add("node", child_msg1 + MessageField("node", child_msg3)).
@@ -96,7 +106,8 @@ final class ModificationTestCase {
     val file = MockFile(message)
     val handle = CompleteHandle(file, path(child_msg1))
     val modification = DatabaseModification.empty.remove(handle)
-    val newTopMessage = modification.reduce(file).get
+    val (modFiles, _) = modification.reduce
+    val newTopMessage = modFiles(file).get
     val expectedTopMessage = TreeNodeType.toMessageBuffer(root).
                               add("node", child_msg0).
                               add("node", child_msg2).readOnly
@@ -108,7 +119,7 @@ final class ModificationTestCase {
     val file = MockFile(message)
     val handle = CompleteHandle(file, PathHandle.empty)
     val modification = DatabaseModification.empty.remove(handle)
-    assertEquals(None, modification.reduce(file))
+    assertEquals(None, modification.reduce._1(file))
   }
 
   @Test
@@ -117,7 +128,8 @@ final class ModificationTestCase {
     val handle = CompleteHandle[TreeNode](file, PathHandle.empty)
     val newRoot = TreeNode(-1, "c")
     val modification = DatabaseModification.empty.modify(handle, newRoot)
-    val newTopMessage = modification.reduce(file).get
+    val (modFiles, _) = modification.reduce
+    val newTopMessage = modFiles(file).get
     val expectedTopMessage = TreeNodeType.toMessageBuffer(newRoot).
                               add("node", child_msg0).
                               add("node", child_msg1).
@@ -136,7 +148,8 @@ final class ModificationTestCase {
     val modification = DatabaseModification.empty.
                         modify(handle, newChild_1).
                         insert(handle, nestedMember, child_3)
-    val newTopMessage = modification.reduce(file).get
+    val (modFiles, _) = modification.reduce
+    val newTopMessage = modFiles(file).get
     val expectedTopMessage = TreeNodeType.toMessageBuffer(root).
                               add("node", child_msg0).
                               add("node", newChild_msg1 + MessageField("node", child_msg3)).
@@ -155,7 +168,8 @@ final class ModificationTestCase {
     val modification = DatabaseModification.empty.
                         insert(handle, nestedMember, child_3).
                         modify(handle, newChild_1)
-    val newTopMessage = modification.reduce(file).get
+    val (modFiles, _) = modification.reduce
+    val newTopMessage = modFiles(file).get
     val expectedTopMessage = TreeNodeType.toMessageBuffer(root).
                               add("node", child_msg0).
                               add("node", newChild_msg1 + MessageField("node", child_msg3)).

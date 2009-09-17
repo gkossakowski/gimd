@@ -15,8 +15,8 @@
 package com.google.gimd.modification
 
 import collection.immutable.TreeSet
-import file.File
 import DatabaseModification._
+import file.{FileType, File}
 import query.{Handle, CompleteHandle, PathHandle}
 
 /**
@@ -40,7 +40,8 @@ import query.{Handle, CompleteHandle, PathHandle}
  *
  * <p>An empty modification can be obtained using <code>DatabaseModification.empty</code></p>
  */
-final class DatabaseModification private(commands: Map[File[_], Modification]) {
+final class DatabaseModification private(commands: Map[File[_], Modification],
+                                         newFiles: Map[String, (FileType[_], Message)]) {
 
   /**
    * PhantomMessage is used as placeholder when insert command is translated to modification of
@@ -68,6 +69,22 @@ final class DatabaseModification private(commands: Map[File[_], Modification]) {
   def insert[T,U](handle: Handle[U], nestedMember: NestedMember[T], userObject: T):
     DatabaseModification = insert(completeHandle(handle), nestedMember, userObject)
 
+  /**
+   * <p>Inserts new file to database at the path determined by FileType.</p>
+   *
+   * @returns DatabaseModification with file insertion scheduled for application
+   * @throws ConflictingModificationException if trying to insert file at the same path twice
+   */
+  def insertFile[T](fileType: FileType[T], userObject: T): DatabaseModification = {
+    val msg = fileType.userType.toMessage(userObject)
+    val path = fileType.path(msg)
+    if (!newFiles.contains(path))
+      new DatabaseModification(commands, newFiles(path) = (fileType, msg))
+    else
+      throw new ConflictingModificationException(("Trying to insert new files under path '%1s' " +
+              "twice.").format(path))
+  }
+
   private def insert[T,U](handle: CompleteHandle[U], nestedMember: NestedMember[T], userObject: T):
     DatabaseModification = {
     val userType = userTypeOf(handle)
@@ -81,7 +98,7 @@ final class DatabaseModification private(commands: Map[File[_], Modification]) {
     val phantomField = MessageField(nestedMember.name, PhantomMessage(message))
     val phantomHandle = PathHandle(handle.pathHandle.path :::
             List((PhantomMessageType, phantomField)))
-    new DatabaseModification(commands(file) = modification.addCommand(cmd, phantomHandle))
+    new DatabaseModification(commands(file) = modification.addCommand(cmd, phantomHandle), newFiles)
   }
 
   /**
@@ -101,7 +118,8 @@ final class DatabaseModification private(commands: Map[File[_], Modification]) {
     val message = userType.toMessage(userObject)
     val modification = modificationOf(file)
     val cmd = ModifyCommand(message)
-    new DatabaseModification(commands(file) = modification.addCommand(cmd, handle.pathHandle))
+    new DatabaseModification(commands(file) = modification.addCommand(cmd, handle.pathHandle),
+      newFiles)
   }
 
   /**
@@ -116,16 +134,18 @@ final class DatabaseModification private(commands: Map[File[_], Modification]) {
     val file = handle.file
     val modification = modificationOf(file)
     val cmd = RemoveCommand
-    new DatabaseModification(commands(file) = modification.addCommand(cmd, handle.pathHandle))
+    new DatabaseModification(commands(file) = modification.addCommand(cmd, handle.pathHandle),
+      newFiles)
   }
 
   /**
    * Applies all modifications and returns the result.
    *
-   * @returns Map[File[_], Option[Message]]. If file points at None it means that top-level message
-   *          has been removed and File itself should be removed from Database.
+   * @returns (modifiedFiles, newFiles). If file in modifiedFiles points at None it means that
+   *          top-level message has been removed and File itself should be removed from Database.
    */
-  def reduce: collection.Map[File[_], Option[Message]] = commands.mapElements(_.reduce)
+  def reduce: (collection.Map[File[_],Option[Message]], List[(FileType[_], Message)]) =
+    (commands.mapElements(_.reduce), newFiles.values.toList)
 
   private def userTypeOf[T](handle: CompleteHandle[T], userObject: T): UserType[T] = {
     val userType = userTypeOf(handle)
@@ -159,7 +179,7 @@ object DatabaseModification {
    * Empty modification. This way is always a starting point for any modifications as constructor of
    * DatabaseModification class is private.
    */
-  val empty = new DatabaseModification(Map.empty)
+  val empty = new DatabaseModification(Map.empty, Map.empty)
 
   private def conflictingModificationException(cmd: ModificationCommand,
                                                otherModif: Modification) =

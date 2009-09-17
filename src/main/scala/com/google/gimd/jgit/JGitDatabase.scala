@@ -113,20 +113,31 @@ final class JGitDatabase(branch: JGitBranch) extends Database {
     builder.finish
 
     val objectWriter = new ObjectWriter(repository)
-    class EditMessage(file: File[_], newMsg: Message) extends DirCacheEditor.PathEdit(file.path) {
+    class WriteMessage(path: String, msg: Message) extends DirCacheEditor.PathEdit(path) {
       def apply(entry: DirCacheEntry) {
-        val text = Formatter.format(newMsg)
+        val text = Formatter.format(msg)
         val blobId = objectWriter.writeBlob(text.getBytes(Constants.CHARACTER_ENCODING))
         entry.setFileMode(FileMode.REGULAR_FILE)
         entry.setObjectId(blobId)
       }
     }
     val editor = dirCache.editor
-    for ((file, message) <- modification.reduce) {
+    val (modified, newFiles) = modification.reduce
+    for ((file, message) <- modified) {
       message match {
         case None => editor.add(new DirCacheEditor.DeletePath(file.path))
-        case Some(x) => editor.add(new EditMessage(file, x))
+        case Some(x) => {
+          val newPath = file.fileType.path(x)
+          if (newPath != file.path)
+            //TODO: It's undefined what will happen if one file will get renamed and another file
+            //TODO: is added in place of old file.
+            editor.add(new DirCacheEditor.DeletePath(file.path))
+          editor.add(new WriteMessage(newPath, x))
+        }
       }
+    }
+    for ((fileType, message) <- newFiles) {
+      editor.add(new WriteMessage(fileType.path(message), message))
     }
     editor.finish
     dirCache.writeTree(objectWriter)
