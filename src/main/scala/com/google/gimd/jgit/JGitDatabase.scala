@@ -53,19 +53,21 @@ final class JGitDatabase(branch: JGitBranch) extends Database {
     }
   }
 
-  def modify(modification: Snapshot => DatabaseModification) = {
-    val successful = try {
+  def modifyAndReturn[T](modification: Snapshot => (DatabaseModification, T)): T = {
+    val result = try {
       retry(MERGE_RETRIES) {
         val snapshot = latestSnapshot
-        val dbModification = modification(snapshot)
-        applyModification(dbModification, snapshot.commit)
+        val (dbModification, result) = modification(snapshot)
+        applyModification(dbModification, snapshot.commit) match {
+          case true => Some(result)
+          case false => None
+        }
       }
     } catch {
       case e: IOException => throw new JGitDatabaseException(branch, e)
     }
 
-    if (!successful)
-      throw new JGitMergeRetriesExceededException(branch, MERGE_RETRIES)
+    result getOrElse { throw new JGitMergeRetriesExceededException(branch, MERGE_RETRIES) }
   }
 
   def applyModification(modification: DatabaseModification, onto: RevCommit):
@@ -156,15 +158,15 @@ final class JGitDatabase(branch: JGitBranch) extends Database {
   }
 
   private def tryMerging(commitToBeMerged: ObjectId) =
-    retry(MERGE_RETRIES)(merge(commitToBeMerged))
+    retry(MERGE_RETRIES){ Some(merge(commitToBeMerged)) } getOrElse false
 
-  private def retry(howManyTimes: Int)(what: => Boolean): Boolean =
+  private def retry[T](howManyTimes: Int)(what: => Option[T]): Option[T] =
     if (howManyTimes > 0)
-      if (what)
-        true
-      else
-        retry(howManyTimes-1)(what)
+      what match {
+        case Some(x) => Some(x)
+        case None => retry(howManyTimes-1)(what)
+      }
     else
-      false
+      None
 
 }

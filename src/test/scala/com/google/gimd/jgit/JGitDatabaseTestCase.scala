@@ -189,6 +189,22 @@ final class JGitDatabaseTestCase extends AbstractJGitTestCase {
     assertEquals(expected, foundFiles.map(_.userObject))
   }
 
+  @Test
+  def emptyModificationAndReturn {
+    val expected = 100
+
+    val path = "sm/first.sm"
+    val blobId = writeMessage(SimpleMessageType, SimpleMessage("first", 1))
+
+    commit(List(path -> blobId))
+
+    val db = new JGitDatabase(masterBranch)
+
+    val result = db.modifyAndReturn { _ => (DatabaseModification.empty, expected) }
+
+    assertEquals(expected, result)
+  }
+
   private def commit(files: List[(String, ObjectId)]) {
     val treeId = addFiles(files)
     val commitId = createCommit("Test", treeId)

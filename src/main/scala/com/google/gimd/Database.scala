@@ -33,21 +33,32 @@ trait Database {
     latestSnapshot.query(ft, p).map(_._2)
 
   /**
+   * <p>The same as modifyAndReturn method but always returns Unit.</p>
+   *
+   * @see #modifyAndReturn
+   */
+  @throws(classOf[GimdException])
+  def modify(modification: Snapshot => DatabaseModification): Unit =
+    modifyAndReturn{ s => (modification(s), ()) }
+
+  /**
    * <p>Method that allows modification of latest Snapshot of Database.</p>
    *
    * <p>For single DatabaseModification derived from Snapshot READ COMMITTED level of isolation is
    * guaranteed. <strong>The level of isolation might be changed in a future but only to level which
    * provides better isolation.</strong></p>
    *
-   * @param modification A function <code>Snapshot => DatabaseModification</code> that should
+   * @param modification A function <code>Snapshot => (DatabaseModification, T)</code> that should
    *                     follow referential transparency rule as it can be called an arbitrary
-   *                     number of times. Result of this function is an object that specifies what
-   *                     kind of modifications should be performed on top of passed Snapshot.
+   *                     number of times. Result of this function is a tuple consisting of an object
+   *                     that specifies what kind of modifications should be performed on top of
+   *                     passed Snapshot and arbitrary value of type T that is returned as result.
+   * @returns a value returned by modification function
    *
    * @throws GimdException
    */
   @throws(classOf[GimdException])
-  def modify(modification: Snapshot => DatabaseModification)
+  def modifyAndReturn[T](modification: Snapshot => (DatabaseModification, T)): T
 
   /**
    * Factory method returning latest Snapshot of Database.
