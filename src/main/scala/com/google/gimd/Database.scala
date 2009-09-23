@@ -63,6 +63,6 @@ trait Database {
   /**
    * Factory method returning latest Snapshot of Database.
    */
-  protected def latestSnapshot: Snapshot
+  def latestSnapshot: Snapshot
 
 }
