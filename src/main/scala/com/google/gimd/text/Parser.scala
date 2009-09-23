@@ -41,9 +41,31 @@ class Parser extends RegexParsers {
   def message: Parser[Message] = message(0)
   def field: Parser[Field] = field(0)
 
-  private def message(level: Int): Parser[Message] = (field(level) *) ^^ {
-    case fieldList => Message(fieldList)
+  private def checkSorting(fields: List[Field]): Option[String] = fields match {
+    case x :: y :: tail => if (x < y)
+                             checkSorting(y :: tail)
+                           else
+                             Some("""|Fields X, Y do not satisfy condition X < Y where
+                                     |X:
+                                     |%1s
+                                     |Y:
+                                     |%2s""".format(x, y))
+    case x :: Nil => None
+    case Nil => None
   }
+
+  private def message(level: Int): Parser[Message] = (field(level) *) into {
+    case fieldList => checkSorting(fieldList) match {
+                        case None => success(Message(fieldList))
+                        //TODO Right now message for failure can be very big depending on contents
+                        //TODO of fields that are in wrong order.
+                        //TODO It would be much better to rewrite Message parser from scratch and
+                        //TODO fail as soon as field that is out of order is parsed. Then it would
+                        //TODO be enough just to report the line number where parsing really failed.
+                        case Some(errorMsg) => failure(errorMsg)
+                      }
+  }
+
   private def field(level: Int): Parser[Field] =
     indent(level) ~> ident <~ ' ' into {
       case name => value(level, name) <~ '\n'

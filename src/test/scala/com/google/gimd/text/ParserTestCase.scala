@@ -197,6 +197,46 @@ final class ParserTestCase {
     assertEquals(Message(Field("field", "-0")), msg)
   }
 
+  @Test
+  def wrongOrderOfTwoFields {
+    val input = """|b 2
+                   |a 1
+                   |""".stripMargin
+    assertInvalidFieldOrder(input)
+  }
+
+  @Test
+  def wrongOrderOfFourFields {
+    val input = """|b 1
+                   |c 1
+                   |a 1
+                   |d 1
+                   |""".stripMargin
+    assertInvalidFieldOrder(input)
+  }
+
+  @Test
+  def duplicatedFields {
+    val input = """|a 1
+                   |b 2
+                   |b 2
+                   |c 3
+                   |""".stripMargin
+    assertInvalidFieldOrder(input)
+  }
+
+  private def assertInvalidFieldOrder(input: String) {
+    val expectedMsg = "Fields X, Y do not satisfy condition X < Y where"
+    try {
+      parse(input)
+    } catch {
+      //TODO this is a quick hack to make sure that exception we catch is carrying information about
+      //TODO the error we are expecting. In a future it should be Parser that is changed to make
+      //TODO such testing easier
+      case e: ParserException => if (!e.getMessage.contains(expectedMsg)) throw e
+    }
+  }
+
   //TODO (1) Add tests for Int and Long specifically
   //TODO (2) Add tests for timestamps
 
