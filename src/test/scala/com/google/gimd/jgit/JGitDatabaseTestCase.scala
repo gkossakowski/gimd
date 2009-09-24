@@ -20,25 +20,24 @@ import org.junit.Test
 import org.junit.Assert._
 import org.spearce.jgit.lib.{Constants, ObjectId}
 import query.Predicate
+import UserType._
 
 final class JGitDatabaseTestCase extends AbstractJGitTestCase {
 
   case class SimpleMessage(name: String, value: Int)
 
   object SimpleMessageType extends UserType[SimpleMessage] {
-    def toUserObject(m: Message): SimpleMessage = {
-      val name = m.one("name").stringField.value
-      val value = m.one("value").intField.value
-      SimpleMessage(name, value)
-    }
-    def fields = List(FieldSpec("name", StringField, _.name), FieldSpec("value", IntField, _.value))
+    val name = FieldSpecOne("name", StringField, _.name)
+    val value = FieldSpecOne("value", IntField, _.value)
+    def fields = name :: value
+    def toUserObject(m: Message): SimpleMessage = SimpleMessage(name(m), value(m))
   }
 
   object SimpleMessageFileType extends FileType[SimpleMessage] {
     val pathPrefix = Some("sm/")
     val pathSuffix = Some(".sm")
     val userType = SimpleMessageType
-    def name(m: Message) = m.one("name").stringField.value
+    def name(m: Message) = userType.name(m)
   }
 
   @Test

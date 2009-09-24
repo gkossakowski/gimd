@@ -17,17 +17,16 @@ package com.google.gimd.query
 import file.{File, FileType}
 import org.junit.Test
 import org.junit.Assert._
+import UserType._
 
 class MessageQueryTestCase {
   case class TreeNode(id: Int, name: String)
   object TreeNodeType extends UserType[TreeNode] {
-    def toUserObject(m: Message): TreeNode =
-      new TreeNode(
-        m.one("id").intField.value,
-        m.one("name").stringField.value
-      )
+    val id = FieldSpecOne("id", IntField, _.id)
+    val name = FieldSpecOne("name", StringField, _.name)
+    def fields = id :: name
     override def children = Seq(new NestedMember("node", TreeNodeType))
-    def fields = List(FieldSpec("id", IntField, _.id), FieldSpec("name", StringField, _.name))
+    def toUserObject(m: Message) = new TreeNode(id(m), name(m))
   }
 
   val root = new TreeNode(-1, "a")

@@ -18,25 +18,24 @@ import file.FileType
 import junit.framework.Assert._
 import org.junit.Test
 import org.spearce.jgit.lib.ObjectId
+import UserType._
 
 class JGitFileTestCase extends AbstractJGitTestCase {
 
   case class SimpleMessage(name: String, value: Int)
 
   object SimpleMessageType extends UserType[SimpleMessage] {
-    def toUserObject(m: Message): SimpleMessage = {
-      val name = m.one("name").stringField.value
-      val value = m.one("value").intField.value
-      SimpleMessage(name, value)
-    }
-    def fields = List(FieldSpec("name", StringField, _.name), FieldSpec("value", IntField, _.value))
+    val name = FieldSpecOne("name", StringField, _.name)
+    val value = FieldSpecOne("value", IntField, _.value)
+    def fields = name :: value
+    def toUserObject(m: Message) = SimpleMessage(name(m), value(m))
   }
 
   object SimpleMessageFileType extends FileType[SimpleMessage] {
     val pathPrefix = None
     val pathSuffix = None
     val userType = SimpleMessageType
-    def name(m: Message) = m.one("name").stringField.value
+    def name(m: Message) = userType.name(m).toString
   }
 
   @Test

@@ -17,15 +17,20 @@ package com.google.gimd
 
 import org.junit.Test
 import org.junit.Assert._
+import UserType._
 
 class UserTypeTestCase {
 
-  class MyUserType extends UserType[String] {
-    def toUserObject(itr: Message): String = ""
-    def fields = Nil
+  case class Person(id: Int, name: String)
+
+  class PersonUserType extends UserType[Person] {
+    val id = FieldSpecOne("id", IntField, _.id)
+    val name = FieldSpecOption("name", StringField, _.name, null)
+    def toUserObject(m: Message) = Person(id(m), name(m))
+    def fields = id :: name
   }
 
-  class MyChildUserType extends MyUserType
+  class MyChildUserType extends PersonUserType
 
   abstract class MyWrongUserTypeBase[T] extends UserType[T]
   class MyWrongUserType extends MyWrongUserTypeBase[String] {
@@ -35,20 +40,42 @@ class UserTypeTestCase {
 
   @Test
   def userTypeClass {
-    val ut = new MyUserType
-    assertEquals(classOf[String], ut.userTypeClass)
+    val ut = new PersonUserType
+    assertEquals(classOf[Person], ut.userTypeClass)
   }
 
   @Test
   def userTypeClassInSubtype {
     val ut = new MyChildUserType
-    assertEquals(classOf[String], ut.userTypeClass)
+    assertEquals(classOf[Person], ut.userTypeClass)
   }
 
   @Test{val expected = classOf[IllegalStateException]}
   def userTypeErased {
     val ut = new MyWrongUserType
     ut.userTypeClass
+  }
+
+  @Test
+  def optionalValueNotPresentInMessage {
+    val msg = Message(Field("id", 2))
+    val ut = new PersonUserType
+    val person = ut.toUserObject(msg)
+    assertEquals(Person(2, null), person)
+  }
+
+  @Test
+  def defaultForOptionalValueInUserObject {
+    val ut = new PersonUserType
+    val msg = ut.toMessage(Person(3, null))
+    assertEquals(Message(Field("id", 3)), msg)
+  }
+
+  @Test
+  def nonDefaultForOptionalValueInUserObject {
+    val ut = new PersonUserType
+    val msg = ut.toMessage(Person(3, "John"))
+    assertEquals(Message(Field("id", 3), Field("name", "John")), msg)
   }
 
 }
