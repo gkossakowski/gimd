@@ -14,8 +14,8 @@
 
 package com.google.gimd.file
 
-
-import query._
+import com.google.gimd.Message
+import com.google.gimd.query._
 
 /**
  * File is one of the fundamental concepts in Gimd. Basically File is unit of

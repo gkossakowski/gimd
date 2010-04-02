@@ -14,6 +14,8 @@
 
 package com.google.gimd.query
 
+import com.google.gimd.ClassUtils
+
 trait Predicate[T] {
   /**
    * Checks if predicate is applicable to given type represented by Class object.

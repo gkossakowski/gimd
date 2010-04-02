@@ -14,10 +14,11 @@
 
 package com.google.gimd.query
 
-import file.{File, FileType}
+import com.google.gimd._
+import com.google.gimd.UserType._
+import com.google.gimd.file.{File, FileType}
 import org.junit.Test
 import org.junit.Assert._
-import UserType._
 
 class MessageQueryTestCase {
   case class TreeNode(id: Int, name: String)

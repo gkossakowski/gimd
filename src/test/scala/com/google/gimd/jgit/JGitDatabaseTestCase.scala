@@ -14,13 +14,14 @@
 
 package com.google.gimd.jgit
 
-import file.{File, FileType}
-import modification.DatabaseModification
+import com.google.gimd._
+import com.google.gimd.UserType._
+import com.google.gimd.file.{File, FileType}
+import com.google.gimd.modification.DatabaseModification
+import com.google.gimd.query.Predicate
+import org.spearce.jgit.lib.{Constants, ObjectId}
 import org.junit.Test
 import org.junit.Assert._
-import org.spearce.jgit.lib.{Constants, ObjectId}
-import query.Predicate
-import UserType._
 
 final class JGitDatabaseTestCase extends AbstractJGitTestCase {
 
@@ -101,7 +102,7 @@ final class JGitDatabaseTestCase extends AbstractJGitTestCase {
 
   @Test
   def modifySimpleMessagesWithoutMovingFiles {
-    import query.Predicate.functionLiteral2Predicate
+    import com.google.gimd.query.Predicate.functionLiteral2Predicate
 
     val first = SimpleMessage("first", 1)
     val second = SimpleMessage("second", 2)
@@ -130,7 +131,7 @@ final class JGitDatabaseTestCase extends AbstractJGitTestCase {
 
   @Test
   def modifySimpleMessagesWithMovingFiles {
-    import query.Predicate.functionLiteral2Predicate
+    import com.google.gimd.query.Predicate.functionLiteral2Predicate
 
     val first = SimpleMessage("first", 1)
     val second = SimpleMessage("second", 2)
@@ -162,7 +163,7 @@ final class JGitDatabaseTestCase extends AbstractJGitTestCase {
 
   @Test
   def deleteSimpleMessage {
-    import query.Predicate.functionLiteral2Predicate
+    import com.google.gimd.query.Predicate.functionLiteral2Predicate
 
     val first = SimpleMessage("first", 1)
     val second = SimpleMessage("second", 2)

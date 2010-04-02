@@ -14,9 +14,10 @@
 
 package com.google.gimd.text
 
+import com.google.gimd.{Field, Message}
+import Parser._
 import org.junit.Test
 import org.junit.Assert._
-import Parser._
 
 final class ParserTestCase {
 

@@ -14,9 +14,10 @@
 
 package com.google.gimd.text
 
+import com.google.gimd.{Field, Message}
+import Formatter._
 import org.junit.Test
 import org.junit.Assert.assertEquals
-import Formatter._
 
 final class FormatterTestCase {
 

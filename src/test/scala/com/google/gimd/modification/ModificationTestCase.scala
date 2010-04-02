@@ -15,11 +15,12 @@
 package com.google.gimd.modification
 
 
-import file.{FileType, File}
+import com.google.gimd._
+import com.google.gimd.UserType._
+import com.google.gimd.file.{FileType, File}
+import com.google.gimd.query._
 import org.junit.Test
 import org.junit.Assert._
-import query._
-import UserType._
 
 final class ModificationTestCase {
 

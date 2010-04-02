@@ -14,11 +14,12 @@
 
 package com.google.gimd.jgit
 
-import file.FileType
-import junit.framework.Assert._
-import org.junit.Test
+import com.google.gimd._
+import com.google.gimd.UserType._
+import com.google.gimd.file.FileType
 import org.spearce.jgit.lib.ObjectId
-import UserType._
+import org.junit.Test
+import junit.framework.Assert._
 
 class JGitFileTestCase extends AbstractJGitTestCase {
 

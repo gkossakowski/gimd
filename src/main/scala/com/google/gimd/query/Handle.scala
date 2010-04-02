@@ -14,6 +14,7 @@
 
 package com.google.gimd.query
 
+import com.google.gimd.{MessageField, UserType}
 import com.google.gimd.file.File
 
 /** Any handle to a stored message which corresponds to user object of type T. */

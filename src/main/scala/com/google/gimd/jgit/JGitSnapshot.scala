@@ -14,7 +14,8 @@
 
 package com.google.gimd.jgit
 
-import file.{File, FileType}
+import com.google.gimd.Snapshot
+import com.google.gimd.file.{File, FileType}
 import org.spearce.jgit.lib.{Repository, FileMode}
 import org.spearce.jgit.revwalk.RevCommit
 import org.spearce.jgit.treewalk.filter.{PathFilter, PathSuffixFilter, AndTreeFilter, TreeFilter}

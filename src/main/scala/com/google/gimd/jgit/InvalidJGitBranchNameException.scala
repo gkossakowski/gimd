@@ -14,6 +14,7 @@
 
 package com.google.gimd.jgit
 
+import com.google.gimd.GimdException
 import org.spearce.jgit.lib.Repository
 
 final class InvalidJGitBranchNameException(val repository: Repository, name: String)

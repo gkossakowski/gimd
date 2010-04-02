@@ -14,6 +14,8 @@
 
 package com.google.gimd.jgit
 
+import com.google.gimd.GimdException
+
 case class JGitDatabaseException(val branch: JGitBranch,
                                  val msg: String,
                                  val cause: Throwable) extends GimdException(msg, cause) {

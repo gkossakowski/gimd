@@ -14,6 +14,8 @@
 
 package com.google.gimd.modification
 
+import com.google.gimd.GimdException
+
 /**
  * Exception indicating that two conflicting modifications were supplied to DatabaseModification
  * class.

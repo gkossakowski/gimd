@@ -14,6 +14,8 @@
 
 package com.google.gimd.file
 
+import com.google.gimd.{Message, UserType}
+
 /**
  * FileType carries so meta-information about set of Files that conform to
  * all information carried by FileType.

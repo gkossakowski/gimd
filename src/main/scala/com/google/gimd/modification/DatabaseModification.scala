@@ -14,10 +14,11 @@
 
 package com.google.gimd.modification
 
-import collection.immutable.TreeSet
+import com.google.gimd._
+import com.google.gimd.file.{FileType, File}
+import com.google.gimd.query.{Handle, CompleteHandle, PathHandle}
 import DatabaseModification._
-import file.{FileType, File}
-import query.{Handle, CompleteHandle, PathHandle}
+import collection.immutable.TreeSet
 
 /**
  * <p>Immutable datastructure that represents set of Modifications applied to Gimd database.</p>

@@ -14,10 +14,10 @@
 
 package com.google.gimd.jgit
 
-import file.{FileType, File}
-import java.io.{InputStreamReader, ByteArrayInputStream}
+import com.google.gimd.file.{FileType, File}
+import com.google.gimd.text.Parser
 import org.spearce.jgit.lib.{ObjectId, Repository}
-import text.Parser
+import java.io.{InputStreamReader, ByteArrayInputStream}
 
 final class JGitFile[T](val path: String, val blobId: ObjectId, val fileType: FileType[T],
                         val branch: JGitBranch) extends File[T] {

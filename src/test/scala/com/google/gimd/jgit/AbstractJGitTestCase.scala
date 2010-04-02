@@ -14,9 +14,10 @@
 
 package com.google.gimd.jgit
 
-import java.io.{ByteArrayInputStream, IOException, File}
-import org.junit.{After, Before}
+import com.google.gimd.UserType
 import org.spearce.jgit.lib._
+import org.junit.{After, Before}
+import java.io.{ByteArrayInputStream, IOException, File}
 
 abstract class AbstractJGitTestCase {
 

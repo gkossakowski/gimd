@@ -14,10 +14,11 @@
 
 package com.google.gimd.jgit
 
-import file.{FileType, File}
+import com.google.gimd.{Database, Message, Snapshot}
+import com.google.gimd.file.{FileType, File}
+import com.google.gimd.modification.DatabaseModification
+import com.google.gimd.text.Formatter
 import java.io.{IOException, ByteArrayInputStream}
-import text.Formatter
-import modification.DatabaseModification
 import org.spearce.jgit.lib._
 import org.spearce.jgit.merge.MergeStrategy
 import org.spearce.jgit.lib.RefUpdate.Result
