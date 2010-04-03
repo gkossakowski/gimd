@@ -12,11 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.googe.gimd
-
-import com.google.gimd.Field
-import com.google.gimd.Message
-import com.google.gimd.Timestamp
+package com.google.gimd
 
 import org.junit.Test
 import org.junit.Assert._
