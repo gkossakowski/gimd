@@ -52,18 +52,35 @@ object TextLanguageRules {
    * character such as \x03 (end of text) as a different meaning than as
    * a literal value in the field.  Escaping the character as a hex format
    * inside of a quoted string ensures this will not happen.
+   *
+   * 4) Can be parsed as numeric or Timestamp value. Then such a string value must be quoted so
+   * it can be really interpreted as a string field and not a numeric or Timestamp one.  
    */
   def isQuotingRequired(s: String) =
     (  s.isEmpty
     || s(0) == '<'
     || s(0) == '"'
     || s.exists(isQuoteRequired _)
+    || isNumeric(s)
+    || isTimestamp(s)
     )
 
   private def isQuoteRequired(ch: Char) =
     (   ch == '\n'
     || isNeedHexEscape(ch)
     )
+
+  private def isNumeric(x: String): Boolean =
+    Parser.numeric("numeric")(new scala.util.parsing.input.CharSequenceReader(x + "\n")) match {
+      case _: Parser.Success[_] => true
+      case _ => false
+    }
+
+  private def isTimestamp(x: String): Boolean =
+    Parser.timestamp("timestamp")(new scala.util.parsing.input.CharSequenceReader(x + "\n")) match {
+      case _: Parser.Success[_] => true
+      case _ => false
+    }
 
   /**
    * Construct a new DateFormat for the ISO 8601 / RFC 3339 format.

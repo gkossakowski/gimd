@@ -81,7 +81,7 @@ class Parser extends RegexParsers {
     | bareString   ^^ { case str => Field(name, str) }
     )
 
-  private def numeric(name: String): Parser[NumberField] =
+  private[text] def numeric(name: String): Parser[NumberField] =
     // This functions tries to parse numeric value until end of line, which
     // is the end of the field value. The permitted format consists of three
     // disjoint cases, permitting decimals but disallowing "-0" as input:
@@ -107,7 +107,7 @@ class Parser extends RegexParsers {
     }
   }
 
-  private def timestamp(name: String): Parser[TimestampField] = (
+  private[text] def timestamp(name: String): Parser[TimestampField] = (
     // Roughly ISO 8601, see http://www.w3.org/TR/NOTE-datetime
     // and also RFC 3339.
     //

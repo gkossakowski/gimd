@@ -14,9 +14,49 @@ package com.google.gimd.text
 import org.junit.Test
 import org.junit.Assert._
 import org.scalacheck._
-import com.google.gimd.{MessageField, Message}
+import com.google.gimd._
 
 class FormatterParserTestCase {
+
+  object FormatterParserFieldSpec extends Properties("FormatterParserField") {
+    import TreeMessageGenerator.{arbIntField, arbStringField}
+    import MessageShrinker.shrinkField
+
+    def formatToMessage(x: Field) = Formatter.format(x) + "\n"
+
+    property("formatAndParseAgainIntField") =
+            Prop.forAll((x: IntField) => Message(x) == Parser.parse(formatToMessage(x)))
+
+    property("formatAndParseAgainStringField") =
+            Prop.forAll((x: StringField) => Message(x) == Parser.parse(formatToMessage(x)))
+
+    //TODO add properties for rest of field types
+
+  }
+
+  object FormatterParserMessageSpec extends Properties("FormatterParserMessage") {
+    import TreeMessageGenerator.arbMessage
+    import MessageShrinker.shrinkMessage
+
+    property("formatAndParseAgainMessage") =
+            Prop.forAll((m: Message) => m == Parser.parse(Formatter.format(m)))
+  }
+
+  @Test
+  def formatAndParseFields() {
+    val result = org.scalacheck.Test.check(FormatterParserFieldSpec)
+    if (!result.passed) {
+      fail()
+    }
+  }
+
+  @Test
+  def formatAndParseMessages() {
+    val result = org.scalacheck.Test.check(FormatterParserMessageSpec)
+    if (!result.passed) {
+      fail()
+    }
+  }
 
   @Test
   def checkRatingOfTreeMessageGenerator {
