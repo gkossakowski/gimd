@@ -21,6 +21,11 @@ import query.Predicate
 trait Database {
 
   /**
+   * List of all file types that can be stored in Database.
+   */
+  val fileTypes: List[FileType[_]]
+
+  /**
    * Query database for all user objects of type U stored in files of
    * type FileType[W] satisfying predicate p using latest Snapshot of Database.
    *

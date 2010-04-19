@@ -25,7 +25,7 @@ import org.spearce.jgit.lib.RefUpdate.Result
 import org.spearce.jgit.dircache.{DirCache, DirCacheEditor, DirCacheEntry}
 import org.spearce.jgit.revwalk.{RevCommit, RevTree, RevWalk}
 
-final class JGitDatabase(branch: JGitBranch) extends Database {
+final class JGitDatabase(val fileTypes: List[FileType[_]], branch: JGitBranch) extends Database {
 
   /**
    * The maximal number of merge/transaction rebase retries.
