@@ -65,7 +65,15 @@ class Message(private val fields: Sorted[Field, Field])
    * This implementation is efficient because it does take advantage of the fact that Message is
    * Sorted collection so operation is performed in O(log(n)) time.
    */
-  def all(name: String): Sorted[Field,Field] = range(MinimumField(name), MaximumField(name))
+  def all(name: String) = range(MinimumField(name), MaximumField(name)).toList
+
+  /**
+   * Filters fields of returned by method all so the returned list contains fields of only one given
+   * type. 
+   */
+  def allOfVariant[T <: Field](name: String): List[T] = all(name).flatMap {
+    x => if (x.isInstanceOf[T]) Some(x.asInstanceOf[T]) else None
+  }
 
   /**
    * @throws Predef.NoSuchElementException if there is more than one field with given name

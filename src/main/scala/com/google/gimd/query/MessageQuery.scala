@@ -43,9 +43,7 @@ object MessageQuery {
     //
     for {
       member <- ut.children.elements
-      field <- m.all(member.name).elements
-      if field.isInstanceOf[MessageField]
-      f = field.asInstanceOf[MessageField]
-      (PathHandle(xs), userObject) <- simpleQuery(member.userType, f.value, p)
-    } yield (PathHandle[U]((ut, f) :: xs), userObject)
+      field <- m.allOfVariant[MessageField](member.name).elements
+      (PathHandle(xs), userObject) <- simpleQuery(member.userType, field.value, p)
+    } yield (PathHandle[U]((ut, field) :: xs), userObject)
 }
