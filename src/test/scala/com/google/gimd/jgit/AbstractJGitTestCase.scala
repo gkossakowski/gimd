@@ -18,6 +18,7 @@ import com.google.gimd.UserType
 import org.spearce.jgit.lib._
 import org.junit.{After, Before}
 import java.io.{ByteArrayInputStream, IOException, File}
+import com.google.gimd.text.Formatter
 
 abstract class AbstractJGitTestCase {
 
@@ -47,7 +48,7 @@ abstract class AbstractJGitTestCase {
   }
 
   protected def writeMessage[U](userType: UserType[U], userObject: U): ObjectId =
-    writeTextContent(userType.toMessageBuffer(userObject).readOnly.toString)
+    writeTextContent(Formatter.format(userType.toMessageBuffer(userObject).readOnly))
 
   protected def addFiles(files: List[(String, ObjectId)]): ObjectId = {
     val dc = org.spearce.jgit.dircache.DirCache.newInCore

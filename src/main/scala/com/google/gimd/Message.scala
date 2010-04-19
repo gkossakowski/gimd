@@ -93,5 +93,5 @@ class Message(private val fields: Sorted[Field, Field])
    */
   def one(name: String): Field = oneOption(name).get
 
-  override def toString = Formatter.format(this)
+  override def toString = "Message(" + fields + ")"
 }

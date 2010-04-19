@@ -20,6 +20,7 @@ import com.google.gimd.file.FileType
 import org.spearce.jgit.lib.ObjectId
 import org.junit.Test
 import junit.framework.Assert._
+import text.Formatter
 
 class JGitFileTestCase extends AbstractJGitTestCase {
 
@@ -44,7 +45,7 @@ class JGitFileTestCase extends AbstractJGitTestCase {
     val simpleMessage = SimpleMessage("Test", 10)
     val expected: Message = SimpleMessageType.toMessageBuffer(simpleMessage).readOnly
 
-    val blobId = writeTextContent(expected.toString)
+    val blobId = writeTextContent(Formatter.format(expected))
 
     val jGitFile = new JGitFile("test", blobId, SimpleMessageFileType, masterBranch)
     assertEquals(expected, jGitFile.message)
@@ -55,7 +56,7 @@ class JGitFileTestCase extends AbstractJGitTestCase {
     val expected = SimpleMessage("Test", 10)
     val message: Message = SimpleMessageType.toMessageBuffer(expected).readOnly
 
-    val blobId = writeTextContent(message.toString)
+    val blobId = writeTextContent(Formatter.format(message))
 
     val jGitFile = new JGitFile("test", blobId, SimpleMessageFileType, masterBranch)
     assertEquals(expected, jGitFile.userObject)
