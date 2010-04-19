@@ -27,7 +27,7 @@ final class JGitSnapshot(val branch: JGitBranch, val commit: RevCommit) extends 
     val treeWalk = new TreeWalk(branch.repository)
     treeWalk.reset(commit.getTree)
     treeWalk.setRecursive(true)
-    treeWalk.setFilter(treeFilter(fileType))
+    treeWalk.setFilter(FileTypeTreeFilter(fileType))
 
     val fileIterator = new Iterator[File[T]] {
       private var doesHasNext = treeWalk.next
@@ -42,22 +42,6 @@ final class JGitSnapshot(val branch: JGitBranch, val commit: RevCommit) extends 
       }
     }
     fileIterator
-  }
-
-  private def treeFilter[T](fileType: FileType[T]): TreeFilter =
-    AndTreeFilter.create(
-      Array(
-        RegularFileFilter,
-        fileType.pathPrefix.map(PathFilter.create(_)).getOrElse(TreeFilter.ALL),
-        fileType.pathSuffix.map(PathSuffixFilter.create(_)).getOrElse(TreeFilter.ALL)
-      )
-    )
-
-  private object RegularFileFilter extends TreeFilter {
-    def shouldBeRecursive = false
-    def include(treeWalk: TreeWalk) =
-      treeWalk.isSubtree || FileMode.REGULAR_FILE.equals(treeWalk.getFileMode(0))
-    override def clone = this
   }
 
 }
