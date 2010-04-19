@@ -14,6 +14,8 @@
 
 package com.google.gimd.query
 
+import com.google.gimd.{MessageField, Message, UserType}
+
 object MessageQuery {
   def simpleQuery[U, W](ut: UserType[W], m: Message, p: Predicate[U]):
    Iterator[(PathHandle[U],U)] = {
