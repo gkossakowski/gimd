@@ -15,6 +15,7 @@
 package com.google.gimd.query
 
 import com.google.gimd.{FieldSpecOne, UserType}
+import com.google.gimd.query.BooleanNodeOps.And
 
 /**
  * Class that holds a Query AST defined for specific UserType.
@@ -22,6 +23,8 @@ import com.google.gimd.{FieldSpecOne, UserType}
 final class Query[U <: UserType[_]](val ut: U, val cond: List[Node[Boolean]]) {
 
   def where(f: U => Node[Boolean]) = new Query[U](ut, f(ut) :: cond)
+
+  def node: Node[Boolean] = cond.foldLeft[Node[Boolean]](ConstNode(true))(And)
 
 }
 
