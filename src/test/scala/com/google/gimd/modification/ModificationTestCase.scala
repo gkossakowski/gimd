@@ -208,6 +208,6 @@ final class ModificationTestCase {
   }
 
   private def path(msgs: Message*) =
-    PathHandle(List.make(msgs.size, TreeNodeType) zip msgs.map(MessageField("node", _)).toList)
+    PathHandle(List.fill(msgs.size)(TreeNodeType) zip msgs.map(MessageField("node", _)).toList)
 
 }
