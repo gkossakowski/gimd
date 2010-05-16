@@ -42,8 +42,8 @@ object MessageQuery {
     // property of message and produce a faster join between the two.
     //
     for {
-      member <- ut.children.elements
-      field <- m.allOfVariant[MessageField](member.name).elements
+      member <- ut.children.iterator
+      field <- m.allOfVariant[MessageField](member.name).iterator
       (PathHandle(xs), userObject) <- simpleQuery(member.userType, field.value, p)
     } yield (PathHandle[U]((ut, field) :: xs), userObject)
 }

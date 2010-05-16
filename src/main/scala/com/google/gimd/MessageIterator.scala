@@ -17,7 +17,7 @@ package com.google.gimd
 import com.google.gimd.text.Formatter
 
 class MessageIterator(msg: Message) {
-  private val i = msg.elements
+  private val i = msg.iterator
   private var cur: Option[Field] = None
   private var retry = false
   next()

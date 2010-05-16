@@ -43,7 +43,6 @@ class Message(private val fields: SortedSet[Field])
   override def keySet = fields.keySet
   override def lastKey = fields.lastKey
   override def firstKey = fields.firstKey
-  override def elements = fields.elements
 
   def -(elem: Field) = new Message(fields - elem)
   def +(elem: Field) = new Message(fields + elem)
