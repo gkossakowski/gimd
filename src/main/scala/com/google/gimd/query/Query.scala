@@ -20,9 +20,9 @@ import com.google.gimd.query.BooleanNodeOps.And
 /**
  * Class that holds a Query AST defined for specific UserType.
  */
-final class Query[U <: UserType[_]](val ut: U, val cond: List[Node[Boolean]]) {
+final class Query[W, U <: UserType[W]](val ut: U, val cond: List[Node[Boolean]]) {
 
-  def where(f: U => Node[Boolean]) = new Query[U](ut, f(ut) :: cond)
+  def where(f: U => Node[Boolean]) = new Query[W,U](ut, f(ut) :: cond)
 
   def node: Node[Boolean] = cond.foldLeft[Node[Boolean]](ConstNode(true))(And)
 
@@ -30,11 +30,9 @@ final class Query[U <: UserType[_]](val ut: U, val cond: List[Node[Boolean]]) {
 
 object Query {
 
-  //this alias is needed due to bug in Scala 2.7.x. It's been fixed in 2.8.0 so once we switch to it
-  //this can be removed
-  type UserType_ = UserType[_]
-
-  implicit def userType2Query[U <: UserType_](ut: U) = new Query[U](ut, Nil)
+  //This implicit conversion does not work because types are not inferred, see:
+  // http://thread.gmane.org/gmane.comp.lang.scala.user/25446
+  implicit def userType2Query[W,U <: UserType[W]](ut: U) = new Query[W,U](ut, Nil)
 
   //a few conversions to Node[T]
   implicit def fieldSpecOne2Node[T](fs: FieldSpecOne[_,T]) = FieldSpecOneNode(fs)

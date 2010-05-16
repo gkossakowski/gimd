@@ -34,7 +34,7 @@ object QueryBuilder {
    * T => Boolean which is just a closure that one cannot translate but only apply on a given
    * instance of type T. 
    */
-  def luceneQuery(query: Query[_]): Option[LQuery] = translateNode(query.node)
+  def luceneQuery(query: Query[_,_]): Option[LQuery] = translateNode(query.node)
 
   private def translateNode(node: Node[_]): Option[LQuery] = {
     def translateIs[T](fs: FieldSpecOne[_,_], v: T): LQuery =
