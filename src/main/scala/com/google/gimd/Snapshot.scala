@@ -26,9 +26,13 @@ trait Snapshot {
    * @throws GimdException
    */
   @throws(classOf[GimdException])
-  def query[U,W](ft: FileType[W], p: Predicate[U]): Iterator[(Handle[U],U)] = {
+  def query[U,W](ft: FileType[W], p: Predicate[U]): Iterator[(Handle[U],U)] =
+    queryFiles(all(ft), p)
+
+  protected def queryFiles[U,W](files: Iterator[File[W]], p: Predicate[U]):
+    Iterator[(Handle[U],U)] = {
     for {
-      f <- all(ft)
+      f <- files
       r <- f.query(p)
     } yield r
   }
