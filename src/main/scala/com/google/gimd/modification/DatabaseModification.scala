@@ -86,7 +86,7 @@ final class DatabaseModification private(commands: Map[File[_], Modification],
     val msg = fileType.userType.toMessage(userObject)
     val path = fileType.path(msg)
     if (!newFiles.contains(path))
-      new DatabaseModification(commands, newFiles(path) = (fileType, msg))
+      new DatabaseModification(commands, newFiles.updated(path, (fileType, msg)))
     else
       throw new ConflictingModificationException(("Trying to insert new files under path '%1s' " +
               "twice.").format(path))
@@ -105,7 +105,8 @@ final class DatabaseModification private(commands: Map[File[_], Modification],
     val phantomField = MessageField(nestedMember.name, PhantomMessage(message))
     val phantomHandle = PathHandle(handle.pathHandle.path :::
             List((PhantomMessageType, phantomField)))
-    new DatabaseModification(commands(file) = modification.addCommand(cmd, phantomHandle), newFiles)
+    new DatabaseModification(commands.updated(file, modification.addCommand(cmd, phantomHandle)),
+      newFiles)
   }
 
   /**
@@ -125,7 +126,7 @@ final class DatabaseModification private(commands: Map[File[_], Modification],
     val message = userType.toMessage(userObject)
     val modification = modificationOf(file)
     val cmd = ModifyCommand(message)
-    new DatabaseModification(commands(file) = modification.addCommand(cmd, handle.pathHandle),
+    new DatabaseModification(commands.updated(file, modification.addCommand(cmd, handle.pathHandle)),
       newFiles)
   }
 
@@ -141,7 +142,7 @@ final class DatabaseModification private(commands: Map[File[_], Modification],
     val file = handle.file
     val modification = modificationOf(file)
     val cmd = RemoveCommand
-    new DatabaseModification(commands(file) = modification.addCommand(cmd, handle.pathHandle),
+    new DatabaseModification(commands.updated(file, modification.addCommand(cmd, handle.pathHandle)),
       newFiles)
   }
 
@@ -152,7 +153,7 @@ final class DatabaseModification private(commands: Map[File[_], Modification],
    *          top-level message has been removed and File itself should be removed from Database.
    */
   def reduce: (collection.Map[File[_],Option[Message]], List[(FileType[_], Message)]) =
-    (commands.mapElements(_.reduce), newFiles.values.toList)
+    (commands.mapValues(_.reduce), newFiles.values.toList)
 
   private def userTypeOf[T](handle: CompleteHandle[T], userObject: T): UserType[T] = {
     val userType = userTypeOf(handle)
@@ -230,12 +231,12 @@ object DatabaseModification {
      * @returns (edits: Map[MessageField, Message], removals: Set[MessageField])
      */
     protected def reduceChildren: (Map[MessageField, Message], Set[MessageField]) = {
-      val reducedChildren = children.mapElements(_.reduce)
+      val reducedChildren = children.mapValues(_.reduce)
       val initMap: Map[MessageField, Message] = Map.empty
       val initSet: Set[MessageField] = Set.empty
       reducedChildren.foldLeft((initMap, initSet)) {
         case ((map, set), (key, None)) => (map, set + key)
-        case ((map, set), (key, Some(x))) => (map(key) = x, set)
+        case ((map, set), (key, Some(x))) => (map.updated(key, x), set)
       }
     }
   }
@@ -247,7 +248,7 @@ object DatabaseModification {
           extends ModificationTree(userType, oldMessage, children) {
 
     def addChild(key: MessageField, child: Modification) =
-      ImplicitNode(userType, oldMessage, children(key) = child)
+      ImplicitNode(userType, oldMessage, children.updated(key, child))
 
     def transformAccordingToCommand(cmd: ModificationCommand) = cmd match {
       case RemoveCommand => if (children == Map.empty)
@@ -280,7 +281,7 @@ object DatabaseModification {
           extends ModificationTree(userType, oldMessage, children) {
 
     def addChild(key: MessageField, child: Modification) =
-      EditNode(userType, oldMessage, newMessage, children(key) = child)
+      EditNode(userType, oldMessage, newMessage, children.updated(key, child))
 
     def transformAccordingToCommand(cmd: ModificationCommand) =
       throw conflictingModificationException(cmd, this)
