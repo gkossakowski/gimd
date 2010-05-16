@@ -25,7 +25,7 @@ import org.spearce.jgit.lib.RefUpdate.Result
 import org.spearce.jgit.dircache.{DirCache, DirCacheEditor, DirCacheEntry}
 import org.spearce.jgit.revwalk.{RevCommit, RevTree, RevWalk}
 
-final class JGitDatabase(val fileTypes: List[FileType[_]], branch: JGitBranch) extends Database {
+class JGitDatabase(val fileTypes: List[FileType[_]], val branch: JGitBranch) extends Database {
 
   /**
    * The maximal number of merge/transaction rebase retries.
@@ -43,7 +43,7 @@ final class JGitDatabase(val fileTypes: List[FileType[_]], branch: JGitBranch) e
    */
   private val MERGE_RETRIES = 10
 
-  private val repository = branch.repository
+  protected val repository = branch.repository
 
   def latestSnapshot: JGitSnapshot = {
     try {

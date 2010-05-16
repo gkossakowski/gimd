@@ -19,7 +19,7 @@ import com.google.gimd.file.{File, FileType}
 import org.spearce.jgit.revwalk.RevCommit
 import org.spearce.jgit.treewalk.TreeWalk
 
-final class JGitSnapshot(val branch: JGitBranch, val commit: RevCommit) extends Snapshot {
+class JGitSnapshot(val branch: JGitBranch, val commit: RevCommit) extends Snapshot {
 
   def all[T](fileType: FileType[T]): Iterator[File[T]] = {
     val treeWalk = new TreeWalk(branch.repository)
