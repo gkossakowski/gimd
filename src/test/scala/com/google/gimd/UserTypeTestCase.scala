@@ -50,7 +50,7 @@ class UserTypeTestCase {
     assertEquals(classOf[Person], ut.userTypeClass)
   }
 
-  @Test{val expected = classOf[IllegalStateException]}
+  @Test(expected = classOf[IllegalStateException])
   def userTypeErased {
     val ut = new MyWrongUserType
     ut.userTypeClass

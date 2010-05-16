@@ -177,7 +177,7 @@ final class ModificationTestCase {
     assertEquals(expectedTopMessage, newTopMessage)
   }
 
-  @Test{val expected = classOf[ConflictingModificationException]}
+  @Test(expected = classOf[ConflictingModificationException])
   def removeTopAndInsertUnderneath {
     val file = MockFile(message)
     val handle = CompleteHandle(file, PathHandle.empty)
@@ -185,21 +185,21 @@ final class ModificationTestCase {
     DatabaseModification.empty.remove(handle).insert(handle, nestedMember, child_3)
   }
 
-  @Test{val expected = classOf[ConflictingModificationException]}
+  @Test(expected = classOf[ConflictingModificationException])
   def editTopTwoTimes {
     val file = MockFile(message)
     val handle = CompleteHandle[TreeNode](file, PathHandle.empty)
     DatabaseModification.empty.modify(handle, root).modify(handle, root)
   }
 
-  @Test{val expected = classOf[IllegalArgumentException]}
+  @Test(expected = classOf[IllegalArgumentException])
   def editWrongType {
     val file = MockFile(message)
     val handle = CompleteHandle[Unit](file, PathHandle.empty)
     DatabaseModification.empty.modify(handle, ())
   }
 
-  @Test{val expected = classOf[IllegalArgumentException]}
+  @Test(expected = classOf[IllegalArgumentException])
   def passWrongNestedMember {
     val file = MockFile(message)
     val handle = CompleteHandle[TreeNode](file, PathHandle.empty)

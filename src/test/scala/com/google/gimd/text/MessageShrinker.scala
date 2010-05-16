@@ -21,7 +21,7 @@ import com.google.gimd._
 object MessageShrinker {
 
   implicit def shrinkMessage: Shrink[Message] = {
-    def shrinkFields(xs: List[Field]) = shrinkList(shrinkField).shrink(xs)
+    def shrinkFields(xs: List[Field]) = shrink(xs)
     Shrink {
       case m: Message => {
         val shrunkMsgs = for (shrunkFields <- shrinkFields(m.toList)) yield Message(shrunkFields)

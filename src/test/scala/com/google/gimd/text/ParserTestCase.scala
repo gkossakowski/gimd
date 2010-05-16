@@ -27,7 +27,7 @@ final class ParserTestCase {
     assertEquals(Message(), msg)
   }
 
-  @Test{val expected = classOf[ParserException]}
+  @Test(expected = classOf[ParserException])
   def LFasOnlyConent {
     parse(new java.io.StringReader("\n"))
   }
@@ -48,17 +48,17 @@ final class ParserTestCase {
     assertEquals(expected, msg)
   }
 
-  @Test{val expected = classOf[ParserException]}
+  @Test(expected = classOf[ParserException])
   def fieldNameStartingWithNumber {
     parse(new java.io.StringReader("12fieldName 0\n"))
   }
 
-  @Test{val expected = classOf[ParserException]}
+  @Test(expected = classOf[ParserException])
   def fieldNameContainingNonLatinCharacter {
     parse(new java.io.StringReader("fieldżółty 0\n"))
   }
 
-  @Test{val expected = classOf[ParserException]}
+  @Test(expected = classOf[ParserException])
   def angleBracketsDoNotMatch {
     val input = """|firstName John
                    |nested1 <
@@ -97,7 +97,7 @@ final class ParserTestCase {
     assertEquals(Message(Field("field", "\\Backslash as prefix?")), msg)
   }
 
-  @Test{val expected = classOf[ParserException]}
+  @Test(expected = classOf[ParserException])
   def bareStringWithUnescapedCharacter {
     parse("field Here comes tab:"+18.toChar+"\n")
   }
@@ -108,7 +108,7 @@ final class ParserTestCase {
     assertEquals(Message(Field("field", "")), msg)
   }
 
-  @Test{val expected = classOf[ParserException]}
+  @Test(expected = classOf[ParserException])
   def doesNotNeedQuotingString {
     parse("field \"This string doesn't need quoting!\"\n")
   }
@@ -135,7 +135,7 @@ final class ParserTestCase {
     assertEquals(expected, msg)
   }
 
-  @Test{val expected = classOf[ParserException]}
+  @Test(expected = classOf[ParserException])
   def wrongIndentionForMultiLineString {
     val input = """|level1 < "
                    |  level2 "

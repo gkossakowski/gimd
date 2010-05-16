@@ -24,6 +24,8 @@ import org.spearce.jgit.merge.MergeStrategy
 import org.spearce.jgit.lib.RefUpdate.Result
 import org.spearce.jgit.dircache.{DirCache, DirCacheEditor, DirCacheEntry}
 import org.spearce.jgit.revwalk.{RevCommit, RevTree, RevWalk}
+import com.google.gimd.{Database, Snapshot}
+import com.google.gimd.Message
 
 final class JGitDatabase(val fileTypes: List[FileType[_]], branch: JGitBranch) extends Database {
 
@@ -112,7 +114,7 @@ final class JGitDatabase(val fileTypes: List[FileType[_]], branch: JGitBranch) e
   private def writeMessages(modification: DatabaseModification, oldTree: RevTree): ObjectId = {
     val dirCache = DirCache.newInCore
     val builder = dirCache.builder
-    builder.addTree(new Array[byte](0), 0, repository, oldTree)
+    builder.addTree(new Array[Byte](0), 0, repository, oldTree)
     builder.finish
 
     val objectWriter = new ObjectWriter(repository)

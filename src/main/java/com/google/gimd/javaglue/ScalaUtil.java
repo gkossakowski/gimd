@@ -17,18 +17,13 @@ package com.google.gimd.javaglue;
 import java.util.Collection;
 
 import scala.Function1;
+import scala.runtime.AbstractFunction1;
 import scala.Function1$class;
 
 public class ScalaUtil {
 
   public static <T,R> Function1<T,R> fun1(final JFunction1<T,R> f) {
-    return new Function1<T,R>() {
-
-      @SuppressWarnings("unchecked")
-      @Override
-      public <A> Function1<T, A> andThen(Function1<R, A> g) {
-        return Function1$class.andThen(this, g);
-      }
+    return new AbstractFunction1<T,R>() {
 
       @Override
       public R apply(T x) {
@@ -39,24 +34,13 @@ public class ScalaUtil {
         }
       }
 
-      @SuppressWarnings("unchecked")
-      @Override
-      public <A> Function1<A, R> compose(Function1<A, T> g) {
-        return Function1$class.compose(this, g);
-      }
-
-      @Override
-      public int $tag() {
-        return 0;
-      }
-
     };
   }
 
   @SuppressWarnings("unchecked")
-  public static <T> scala.List<T> toScalaList(Collection<T> xs) {
+  public static <T> scala.collection.immutable.List<T> toScalaList(Collection<T> xs) {
     //Java sucks as there is no way to create a generic Array so casting is needed
-    return scala.List$.MODULE$.fromArray(xs.toArray( (T[])new Object[xs.size()] ));
+    return scala.collection.immutable.List$.MODULE$.fromArray(xs.toArray( (T[])new Object[xs.size()] ));
   }
 
   public static <T,U> scala.Tuple2<T,U> tuple2(T x, U y) {

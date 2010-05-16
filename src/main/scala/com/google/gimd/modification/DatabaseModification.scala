@@ -19,6 +19,12 @@ import com.google.gimd.file.{FileType, File}
 import com.google.gimd.query.{Handle, CompleteHandle, PathHandle}
 import DatabaseModification._
 import collection.immutable.TreeSet
+import com.google.gimd.Message
+import com.google.gimd.UserType
+import com.google.gimd.NestedMember
+import com.google.gimd.Field
+import com.google.gimd.MessageField
+import com.google.gimd.MessageBuffer
 
 /**
  * <p>Immutable datastructure that represents set of Modifications applied to Gimd database.</p>
@@ -48,7 +54,7 @@ final class DatabaseModification private(commands: Map[File[_], Modification],
    * PhantomMessage is used as placeholder when insert command is translated to modification of
    * non-existing (phantom) message.
    */
-  private final case class PhantomMessage(replaceWith: Message) extends Message(TreeSet.empty)
+  private final case class PhantomMessage(replaceWith: Message) extends Message(TreeSet.empty(Ordering.ordered))
   private object PhantomMessageType extends UserType[Unit] {
     def toUserObject(itr: Message) = ()
     def fields = Nil

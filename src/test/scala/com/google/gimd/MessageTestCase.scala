@@ -29,7 +29,7 @@ class MessageTestCase {
     assertSameElements(Set(), message.all("nonExistingName"))
   }
 
-  @Test{val expected = classOf[NoSuchElementException]}
+  @Test(expected = classOf[NoSuchElementException])
   def getOneOptionOutOfMany {
     val message = Message(Field("name", "value"), Field("name", 0))
     message.oneOption("name")
@@ -42,7 +42,7 @@ class MessageTestCase {
     assertEquals(None, message.oneOption("nonExistingName"))
   }
 
-  @Test{val expected = classOf[NoSuchElementException]}
+  @Test(expected = classOf[NoSuchElementException])
   def oneNonExisiting {
     val message = Message(Field("name", "value"))
     message.one("nonExistingName")

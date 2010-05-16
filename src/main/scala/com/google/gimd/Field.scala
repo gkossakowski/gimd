@@ -26,7 +26,7 @@ object Field {
   def apply(name: String, value: Message)    = MessageField(name, value)
 }
 
-abstract sealed case class Field() extends Ordered[Field] with Comparable[Field] {
+abstract sealed class Field() extends Ordered[Field] with Comparable[Field] {
   def name: String
 
   def compare(that: Field) = {
@@ -93,7 +93,7 @@ sealed case class MessageField(name: String, value: Message) extends Field {
   override def messageField = this
 }
 
-abstract sealed case class NumberField() extends Field {
+abstract sealed class NumberField() extends Field {
   def toNumber: Number
   def toBigDecimal: BigDecimal
   override def stringField = StringField(name, Formatter.valueString(this))

@@ -39,7 +39,7 @@ class MessageBuffer {
       fields += elem
     }
 
-    def unsorted = fields.readOnly
+    def unsorted = fields.toSeq
     def sorted = {
       beforeModify()
       if (isSorted) {
@@ -49,7 +49,7 @@ class MessageBuffer {
         isSorted = true
       }
       exported = true
-      fields.readOnly
+      fields.toSeq
     }
 
     def lt(a: Field, b: Field) = a.name.compareTo(b.name) < 0

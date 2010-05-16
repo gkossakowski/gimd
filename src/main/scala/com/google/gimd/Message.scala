@@ -16,40 +16,28 @@ package com.google.gimd;
 
 import com.google.gimd.text.Formatter
 import scala.collection.immutable.TreeSet
-import scala.collection.Sorted
+import scala.collection.immutable.SortedSet
 
 object Message {
-  val empty: Message = new Message(TreeSet.empty)
-  def apply(fields: Iterable[Field]) = empty ++ fields
-  def apply(fields: Field*) = new Message(TreeSet(fields: _*))
+  val empty: Message = new Message(TreeSet.empty(Ordering.ordered[Field]))
+  def apply(fields: Iterable[Field]): Message = new Message(TreeSet.empty(Ordering.ordered[Field]) ++ fields)
+  def apply(fields: Field*) = new Message(TreeSet(fields: _*)(Ordering.ordered[Field]))
 }
 
 //TODO Message should allow to subclass itself only in gimd package but I don't know
 //how to do that right now
-class Message(private val fields: Sorted[Field, Field])
-        extends Ordered[Message] with Sorted[Field, Field] {
+class Message(private val fields: SortedSet[Field])
+        extends Ordered[Message] with SortedSet[Field] {
 
   override def equals(that: Any) = that match {
     case that: Message => compare(that) == 0
     case _ => false
   }
 
-  override def compare(that: Message) = iterable2ordered(this.fields).compare(that.fields)
-  override def compare(k0: Field, k1: Field) = k0.compare(k1)
+  val ordering = Ordering.ordered[Field]
 
-  def +(field: Field): Message = {
-    val buffer = new MessageBuffer
-    buffer ++= this
-    buffer += field
-    buffer.readOnly
-  }
-
-  def ++(that: Iterable[Field]): Message = {
-    val buffer = new MessageBuffer
-    buffer ++= this
-    buffer ++= that
-    buffer.readOnly
-  }
+  override def compare(that: Message) =
+    Ordering.Iterable(ordering).compare(this.fields, that.fields)
 
   override def rangeImpl(from: Option[Field], until: Option[Field]) = fields.rangeImpl(from, until)
   override def keySet = fields.keySet
@@ -57,7 +45,10 @@ class Message(private val fields: Sorted[Field, Field])
   override def firstKey = fields.firstKey
   override def elements = fields.elements
 
-  def iterator = new MessageIterator(this)
+  def -(elem: Field) = new Message(fields - elem)
+  def +(elem: Field) = new Message(fields + elem)
+  def contains(elem: Field) = fields contains elem
+  def iterator = fields.iterator
 
   /**
    * Returns all fields having name equal to given.
@@ -65,7 +56,7 @@ class Message(private val fields: Sorted[Field, Field])
    * This implementation is efficient because it does take advantage of the fact that Message is
    * Sorted collection so operation is performed in O(log(n)) time.
    */
-  def all(name: String) = range(MinimumField(name), MaximumField(name)).toList
+  def all(name: String): SortedSet[Field] = range(MinimumField(name), MaximumField(name))
 
   /**
    * Filters fields of returned by method all so the returned list contains fields of only one given
@@ -73,7 +64,7 @@ class Message(private val fields: Sorted[Field, Field])
    */
   def allOfVariant[T <: Field](name: String): List[T] = all(name).flatMap {
     x => if (x.isInstanceOf[T]) Some(x.asInstanceOf[T]) else None
-  }
+  } toList
 
   /**
    * @throws Predef.NoSuchElementException if there is more than one field with given name
