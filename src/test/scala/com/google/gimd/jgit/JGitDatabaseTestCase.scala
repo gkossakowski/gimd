@@ -43,6 +43,8 @@ final class JGitDatabaseTestCase extends AbstractJGitTestCase {
 
   private val fileTypes = SimpleMessageFileType :: Nil
 
+  private def createDatabase = new JGitDatabase(fileTypes, masterBranch)
+
   @Test
   def allPaths {
     val first = SimpleMessage("first", 1)
@@ -55,7 +57,7 @@ final class JGitDatabaseTestCase extends AbstractJGitTestCase {
     )
     commit(files)
 
-    val db = new JGitDatabase(fileTypes, masterBranch)
+    val db = createDatabase
 
     val foundFiles = db.latestSnapshot.all(SimpleMessageFileType).toList
 
@@ -75,7 +77,7 @@ final class JGitDatabaseTestCase extends AbstractJGitTestCase {
     )
     commit(files)
 
-    val db = new JGitDatabase(fileTypes, masterBranch)
+    val db = createDatabase
 
     val foundFiles = db.latestSnapshot.all(SimpleMessageFileType).toList
 
@@ -96,7 +98,7 @@ final class JGitDatabaseTestCase extends AbstractJGitTestCase {
     val commitId = createCommit("Test commit", treeId)
     moveMaster(commitId)
 
-    val db = new JGitDatabase(fileTypes, masterBranch)
+    val db = createDatabase
 
     val foundFiles = db.latestSnapshot.all(SimpleMessageFileType).toList
     assertEquals(Nil, foundFiles)
@@ -115,7 +117,7 @@ final class JGitDatabaseTestCase extends AbstractJGitTestCase {
                        writeMessage(SimpleMessageType, second))
     commit(paths zip blobIds)
 
-    val db = new JGitDatabase(fileTypes, masterBranch)
+    val db = createDatabase
 
     db.modify { snapshot =>
       val sms = snapshot.query(SimpleMessageFileType, (sm: SimpleMessage) => sm.name == "second")
@@ -144,7 +146,7 @@ final class JGitDatabaseTestCase extends AbstractJGitTestCase {
                        writeMessage(SimpleMessageType, second))
     commit(paths zip blobIds)
 
-    val db = new JGitDatabase(fileTypes, masterBranch)
+    val db = createDatabase
 
     val third = SimpleMessage("third", 3)
 
@@ -176,7 +178,7 @@ final class JGitDatabaseTestCase extends AbstractJGitTestCase {
     )
     commit(files)
 
-    val db = new JGitDatabase(fileTypes, masterBranch)
+    val db = createDatabase
 
     db.modify { snapshot =>
       val sms = snapshot.query(SimpleMessageFileType, (sm: SimpleMessage) => sm.name == "second")
@@ -200,7 +202,7 @@ final class JGitDatabaseTestCase extends AbstractJGitTestCase {
 
     commit(List(path -> blobId))
 
-    val db = new JGitDatabase(fileTypes, masterBranch)
+    val db = createDatabase
 
     val result = db.modifyAndReturn { _ => (DatabaseModification.empty, expected) }
 
