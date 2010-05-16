@@ -16,11 +16,13 @@ package com.google.gimd.query
 
 import com.google.gimd.{FieldSpecOne, UserType}
 import com.google.gimd.query.BooleanNodeOps.And
+import reflect.Manifest
 
 /**
  * Class that holds a Query AST defined for specific UserType.
  */
-final class Query[W, U <: UserType[W]](val ut: U, val cond: List[Node[Boolean]]) {
+final class Query[W, U <: UserType[W]](val ut: U,
+                                       val cond: List[Node[Boolean]])(implicit m: Manifest[W]) {
 
   def where(f: U => Node[Boolean]) = new Query[W,U](ut, f(ut) :: cond)
 
@@ -32,7 +34,8 @@ object Query {
 
   //This implicit conversion does not work because types are not inferred, see:
   // http://thread.gmane.org/gmane.comp.lang.scala.user/25446
-  implicit def userType2Query[W,U <: UserType[W]](ut: U) = new Query[W,U](ut, Nil)
+  implicit def userType2Query[W,U <: UserType[W]](ut: U)(implicit m: Manifest[W]) =
+    new Query[W,U](ut, Nil)
 
   //a few conversions to Node[T]
   implicit def fieldSpecOne2Node[T](fs: FieldSpecOne[_,T]) = FieldSpecOneNode(fs)
