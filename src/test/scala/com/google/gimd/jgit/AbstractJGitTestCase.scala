@@ -28,18 +28,28 @@ abstract class AbstractJGitTestCase {
 
   protected var masterBranch: JGitBranch = null
 
+  /**
+   * Option determining weather repository created by this test-case will be deleted at the end
+   * of test-case execution.
+   */
+  protected val deleteRepository = true
+
   @Before protected def createRepository {
     val file = new File(repositoryPath)
     val repository = new Repository(file)
-    if (file.exists)
-      throw new IOException("Repository already exists: " + file)
-    file.mkdirs()
-    repository.create()
     masterBranch = JGitBranch(repository, masterRef)
+    if (!file.exists) {
+      file.mkdirs()
+      repository.create()
+      val treeId = addFiles(Nil)
+      val commitId = createCommit("Initial commit", treeId)
+      moveMaster(commitId)
+    }
   }
 
   @After protected def removeRepository {
-    org.apache.commons.io.FileUtils.deleteDirectory(new File(repositoryPath))
+    if (deleteRepository)
+      org.apache.commons.io.FileUtils.deleteDirectory(new File(repositoryPath))
   }
 
   protected def writeTextContent(text: String): ObjectId = {
