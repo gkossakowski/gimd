@@ -36,6 +36,7 @@ class JUnit4Runner(clazz: Class[Properties], seed: Long) extends Runner {
       notifier.fireTestStarted(desc)
       result.status match {
         case Passed => notifier.fireTestFinished(desc)
+        case Proved(_) => notifier.fireTestFinished(desc)
         case Failed(args, labels) => {
           val e = new AssertionError("args %s, labels %s".format(args, labels))
           notifier.fireTestFailure(new Failure(desc, e))
