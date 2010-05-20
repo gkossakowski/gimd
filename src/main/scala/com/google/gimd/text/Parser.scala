@@ -67,21 +67,21 @@ class Parser extends RegexParsers {
   }
 
   private def field(level: Int): Parser[Field] =
-    indent(level) ~> ident <~ ' ' into {
-      case name => value(level, name) <~ '\n'
+    (indent(level) ~> ident <~ ' ') ~ (value(level) <~ '\n') ^^ {
+      case name ~ f => f(name)
     }
 
-  private def value(level: Int, name: String): Parser[Field] =
+  private def value(level: Int): Parser[String => Field] =
     ( "<\n" ~> message(level + 1) <~ indent(level) <~ '>' ^^ {
-        case msg => Field(name, msg)
+        case msg => x: String => Field(x, msg)
       }
-    | quotedString(level) ^^ { case str => Field(name, str) }
-    | numeric(name)
-    | timestamp(name)
-    | bareString   ^^ { case str => Field(name, str) }
+    | quotedString(level) ^^ { case str => x: String => Field(x, str) }
+    | numeric
+    | timestamp
+    | bareString ^^ { case str => x: String => Field(x, str) }
     )
 
-  private[text] def numeric(name: String): Parser[NumberField] =
+  private[text] val numeric: Parser[String => NumberField] =
     // This functions tries to parse numeric value until end of line, which
     // is the end of the field value. The permitted format consists of three
     // disjoint cases, permitting decimals but disallowing "-0" as input:
@@ -92,22 +92,22 @@ class Parser extends RegexParsers {
     """(?:0|-?0\.(?:0?[1-9])+|-?[1-9][0-9]*(?:\.(?:0?[1-9])+)?)(?=\n)""".r ^^ {
     case s => {
       if (s.contains('.'))
-        Field(name, BigDecimal(s))
+        Field(_, BigDecimal(s))
       else
         try {
           val l = s.toLong
           if (Integer.MIN_VALUE <= l && l <= Integer.MAX_VALUE)
-            Field(name, l.toInt)
+            Field(_, l.toInt)
           else
-            Field(name, l)
+            Field(_, l)
         } catch {
           case _: NumberFormatException =>
-            Field(name, BigInt(s))
+            Field(_, BigInt(s))
         }
     }
   }
 
-  private[text] def timestamp(name: String): Parser[TimestampField] = (
+  private[text] val timestamp: Parser[String => TimestampField] = (
     // Roughly ISO 8601, see http://www.w3.org/TR/NOTE-datetime
     // and also RFC 3339.
     //
@@ -126,7 +126,7 @@ class Parser extends RegexParsers {
             else
               parseOffset(s.substring(s.length() - 5))
           if (offset != 0 || inUTC)
-            success(Field(name, Timestamp(when, offset)))
+            success(Field(_, Timestamp(when, offset)))
           else
             failure("Invalid timestamp, nonzero timezone: " + s)
         } catch {
@@ -145,7 +145,7 @@ class Parser extends RegexParsers {
     sign * offsetHours * 60 + offsetMins
   }
 
-  private def bareString: Parser[String] =
+  private val bareString: Parser[String] =
     chrExcept('\"', '<', '\n') ~! (chrExcept('\n') *) into {
       case first ~ rest => {
         val s = (first :: rest) mkString ""
@@ -155,6 +155,7 @@ class Parser extends RegexParsers {
           success(s)
       }
     }
+
   private def quotedString(level: Int): Parser[String] =
     (quotedSingleLineString | quotedMultiLineString(level)) into {
       case s => {
@@ -166,7 +167,7 @@ class Parser extends RegexParsers {
       }
     }
 
-  private def quotedSingleLineString: Parser[String] =
+  private val quotedSingleLineString: Parser[String] =
     '"' ~> ((esc | chrExcept('\n', '\\', '"')) *) <~ '"' into {
       case list => success(list mkString "")
     }
@@ -180,7 +181,7 @@ class Parser extends RegexParsers {
       case listOfLines => success(listOfLines.mkString("\n"))
     }
 
-  private def esc =
+  private val esc =
     ( "\\\"" ^^^ '\"'
     | "\\\\" ^^^ '\\'
     | "\\x" ~> hexDigit ~! hexDigit ^^ {
@@ -198,7 +199,7 @@ class Parser extends RegexParsers {
     ( ('0' <= ch && ch <= '9')
     | ('a' <= ch && ch <= 'f')
     )
-  private def hexDigit = elem("hex digit", isHexDigit _)
+  private val hexDigit = elem("hex digit", isHexDigit _)
   private def hexToInt(ch: Char): Int =
     if ('0' <= ch && ch <= '9')
       ch - '0'
@@ -207,7 +208,7 @@ class Parser extends RegexParsers {
   private def hexToChar(u: Char, l: Char) =
     ((hexToInt(u) << 4) | hexToInt(l)).toChar
 
-  private[text] def ident: Parser[String] = "[a-zA-Z][a-zA-Z0-9_]*".r
+  private val ident: Parser[String] = "[a-zA-Z][a-zA-Z0-9_]*".r
   private def chrExcept(except: Char*): Parser[Char] = elem("", ch =>
     (  ch != EofCh
     && !except.contains(ch)
