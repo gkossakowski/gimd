@@ -207,8 +207,7 @@ class Parser extends RegexParsers {
   private def hexToChar(u: Char, l: Char) =
     ((hexToInt(u) << 4) | hexToInt(l)).toChar
 
-  private def ident: Parser[String] =
-    "[a-zA-Z][a-zA-Z0-9_]*".r ^^ { case ident => ident }
+  private[text] def ident: Parser[String] = "[a-zA-Z][a-zA-Z0-9_]*".r
   private def chrExcept(except: Char*): Parser[Char] = elem("", ch =>
     (  ch != EofCh
     && !except.contains(ch)
