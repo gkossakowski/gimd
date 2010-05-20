@@ -3,3 +3,6 @@
 /.manager
 /.settings
 /target
+/project/boot
+/lib_managed
+/project/build/target
