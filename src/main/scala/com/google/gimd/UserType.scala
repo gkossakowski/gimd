@@ -45,7 +45,6 @@ abstract class UserType[T] {
 }
 
 object UserType {
-  implicit def fieldSpec2SingletonList[T,F](x: FieldSpec[T, F]) = List(x)
 
   implicit def FieldSpecOne2Int[T](spec: FieldSpecOne[T, Int]) =
     (m: Message) => m.one(spec.name).intField.value

@@ -31,7 +31,7 @@ final class JGitDatabaseTestCase extends AbstractJGitTestCase {
   object SimpleMessageType extends UserType[SimpleMessage] {
     val name = FieldSpecOne("name", StringField, _.name)
     val value = FieldSpecOne("value", IntField, _.value)
-    def fields = name :: value
+    def fields = name :: value :: Nil
     def toUserObject(m: Message): SimpleMessage = SimpleMessage(name(m), value(m))
   }
 

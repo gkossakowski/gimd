@@ -30,7 +30,7 @@ final class ModificationTestCase {
   object TreeNodeType extends UserType[TreeNode] {
     val id = FieldSpecOne("id", IntField, _.id)
     val name = FieldSpecOne("name", StringField, _.name)
-    def fields = id :: name
+    def fields = id :: name :: Nil
     override def children = Seq(nestedMember)
     def toUserObject(m: Message) = new TreeNode(id(m), name(m))
   }

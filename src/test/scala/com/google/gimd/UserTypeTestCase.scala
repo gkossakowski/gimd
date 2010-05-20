@@ -27,7 +27,7 @@ class UserTypeTestCase {
     val id = FieldSpecOne("id", IntField, _.id)
     val name = FieldSpecOption("name", StringField, _.name, null)
     def toUserObject(m: Message) = Person(id(m), name(m))
-    def fields = id :: name
+    def fields = id :: name :: Nil
   }
 
   class MyChildUserType extends PersonUserType
