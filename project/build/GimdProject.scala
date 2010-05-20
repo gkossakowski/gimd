@@ -10,8 +10,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 import sbt._
+import de.element34.sbteclipsify.Eclipsify
 
-class GimdProject(info: ProjectInfo) extends DefaultProject(info) with IdeaPlugin {
+class GimdProject(info: ProjectInfo) extends DefaultProject(info) with IdeaPlugin with Eclipsify {
   val jgitRepo = "jgit-repository" at "http://egit.googlecode.com/svn/maven/"
   val jgit = "org.spearce" % "jgit" % "0.5.0-93-g5b89a2c"
 
@@ -24,4 +25,3 @@ class GimdProject(info: ProjectInfo) extends DefaultProject(info) with IdeaPlugi
   val junit = "junit" % "junit" % "4.8.1" % "test"
   val commonsIo = "commons-io" % "commons-io" % "1.3.2" % "test"
 }
-
