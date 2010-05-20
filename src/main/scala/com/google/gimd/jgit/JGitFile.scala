@@ -22,7 +22,12 @@ import java.io.{InputStreamReader, ByteArrayInputStream}
 final class JGitFile[T](val path: String, val blobId: ObjectId, val fileType: FileType[T],
                         val branch: JGitBranch) extends File[T] {
 
-  lazy val message = Parser.parse(new InputStreamReader(blobInputStream, "UTF-8"))
+  lazy val message = try {
+    Parser.parse(new InputStreamReader(blobInputStream, "UTF-8"))
+  } catch {
+    case e => throw new JGitDatabaseException(branch, "Failed to parse file with path " + path, e)
+  }
+
   lazy val userObject = fileType.userType.toUserObject(message)
 
   private lazy val blobInputStream = {

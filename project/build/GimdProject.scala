@@ -24,4 +24,5 @@ class GimdProject(info: ProjectInfo) extends DefaultProject(info) with IdeaPlugi
 
   val junit = "junit" % "junit" % "4.8.1" % "test"
   val commonsIo = "commons-io" % "commons-io" % "1.3.2" % "test"
+  val lucene = "org.apache.lucene" % "lucene-core" % "3.0.0"
 }

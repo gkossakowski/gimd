@@ -14,6 +14,9 @@
 
 package com.google.gimd
 
+import query.Query
+import reflect.Manifest
+
 /**
  * UserType[T] defines how to perform conversion between generic Message class and and type T.
  *
@@ -29,6 +32,8 @@ abstract class UserType[T] {
   def fields: List[FieldSpec[T, _]]
   def children: Seq[NestedMember[_]] = Seq()
 
+  def query(implicit m: Manifest[T]): Query[T, this.type] = new Query[T, this.type](this, Nil)
+
   protected final def FieldSpecOne[F](name: String, f1: (String, F) => Field, f2: T => F) =
     new FieldSpecOne(name, f1, f2)
 
@@ -40,7 +45,6 @@ abstract class UserType[T] {
 }
 
 object UserType {
-  implicit def fieldSpec2SingletonList[T,F](x: FieldSpec[T, F]) = List(x)
 
   implicit def FieldSpecOne2Int[T](spec: FieldSpecOne[T, Int]) =
     (m: Message) => m.one(spec.name).intField.value

@@ -28,15 +28,15 @@ class QueryASTTestCase {
   object TreeNodes extends UserType[TreeNode] {
     val id = FieldSpecOne("id", IntField, _.id)
     val name = FieldSpecOne("name", StringField, _.name)
-    def fields = id :: name
+    def fields = id :: name :: Nil
     override def children = Seq(new NestedMember("node", TreeNodes))
     def toUserObject(m: Message) = new TreeNode(id(m), name(m))
   }
 
   @Test
   def equalityOperators = {
-    val q1 = TreeNodes where { _.name is "Joe" }
-    val q2 = TreeNodes where { _.name === "Joe" }
+    val q1 = TreeNodes.query where { _.name is "Joe" }
+    val q2 = TreeNodes.query where { _.name === "Joe" }
     val expected = Is(FieldSpecOneNode(TreeNodes.name), ConstNode("Joe")) :: Nil
     assertEquals(expected, q1.cond)
     assertEquals(expected, q2.cond)
@@ -44,8 +44,8 @@ class QueryASTTestCase {
 
   @Test
   def nonEqualityOperators {
-    val q1 = TreeNodes where { _.name !== "Joe" }
-    val q2 = TreeNodes where { _.name isNot "Joe" }
+    val q1 = TreeNodes.query where { _.name !== "Joe" }
+    val q2 = TreeNodes.query where { _.name isNot "Joe" }
     val expected = Not(Is(FieldSpecOneNode(TreeNodes.name), ConstNode("Joe"))) :: Nil
     assertEquals(expected, q1.cond)
     assertEquals(expected, q2.cond)
@@ -55,9 +55,9 @@ class QueryASTTestCase {
   def booleanOperators {
     val left = TreeNodes.name is "Joe"
     val right = ConstNode(false)
-    val qAnd = TreeNodes where { x => (x.name is "Joe") && false }
-    val qOr = TreeNodes where { x => (x.name is "Joe") || false }
-    val qNot = TreeNodes where { x => !(x.name is "Joe") }
+    val qAnd = TreeNodes.query where { x => (x.name is "Joe") && false }
+    val qOr = TreeNodes.query where { x => (x.name is "Joe") || false }
+    val qNot = TreeNodes.query where { x => !(x.name is "Joe") }
     assertEquals(And(left, right) :: Nil, qAnd.cond)
     assertEquals(Or(left, right) :: Nil, qOr.cond)
     assertEquals(Not(left) :: Nil, qNot.cond)
@@ -65,10 +65,10 @@ class QueryASTTestCase {
 
   @Test
   def orderingOperators {
-    val q1 = TreeNodes where { _.name < "Joe" }
-    val q2 = TreeNodes where { _.name <= "Joe" }
-    val q3 = TreeNodes where { _.name > "Joe" }
-    val q4 = TreeNodes where { _.name >= "Joe" }
+    val q1 = TreeNodes.query where { _.name < "Joe" }
+    val q2 = TreeNodes.query where { _.name <= "Joe" }
+    val q3 = TreeNodes.query where { _.name > "Joe" }
+    val q4 = TreeNodes.query where { _.name >= "Joe" }
     val lt = Relational("<", FieldSpecOneNode(TreeNodes.name), ConstNode("Joe"))
     val is = Is(FieldSpecOneNode(TreeNodes.name), ConstNode("Joe"))
     assertEquals(lt :: Nil, q1.cond)
@@ -80,7 +80,7 @@ class QueryASTTestCase {
   @Test
   def predicateNode {
     val p = Predicate[TreeNode](_.name == "Joe")
-    val q = TreeNodes where { x => p && true }
+    val q = TreeNodes.query where { x => p && true }
     assertEquals(And(PredicateNode(p), ConstNode(true)) :: Nil, q.cond)
   }
 

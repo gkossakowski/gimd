@@ -71,13 +71,13 @@ object TextLanguageRules {
     )
 
   private def isNumeric(x: String): Boolean =
-    Parser.numeric("numeric")(new scala.util.parsing.input.CharSequenceReader(x + "\n")) match {
+    Parser.numeric(new scala.util.parsing.input.CharSequenceReader(x + "\n")) match {
       case _: Parser.Success[_] => true
       case _ => false
     }
 
   private def isTimestamp(x: String): Boolean =
-    Parser.timestamp("timestamp")(new scala.util.parsing.input.CharSequenceReader(x + "\n")) match {
+    Parser.timestamp(new scala.util.parsing.input.CharSequenceReader(x + "\n")) match {
       case _: Parser.Success[_] => true
       case _ => false
     }

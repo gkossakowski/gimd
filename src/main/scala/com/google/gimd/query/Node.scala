@@ -30,7 +30,10 @@ abstract class Node[T]
  * Node that stores FieldSpec. This node acts as placeholder in query for a given field of specific instance
  * defined by UserType.
  */
-final case class FieldSpecOneNode[T](val fieldSpecOne: FieldSpecOne[_, T]) extends Node[T]
+final case class FieldSpecOneNode[T:Manifest,F](val fieldSpecOne: FieldSpecOne[T,F])
+        extends Node[F] {
+  val manifest: Manifest[T] = implicitly
+}
 
 /**
  * Node that holds a constant value of type T.
