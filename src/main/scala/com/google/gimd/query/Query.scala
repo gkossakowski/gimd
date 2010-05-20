@@ -15,35 +15,42 @@
 package com.google.gimd.query
 
 import com.google.gimd.{FieldSpecOne, UserType}
+import com.google.gimd.query.BooleanNodeOps.And
+import reflect.Manifest
 
 /**
  * Class that holds a Query AST defined for specific UserType.
  */
-final class Query[U <: UserType[_]](val ut: U, val cond: List[Node[Boolean]]) {
+final class Query[W, U <: UserType[W]](val ut: U,
+                                       val cond: List[Node[Boolean]])(implicit m: Manifest[W]) {
 
-  def where(f: U => Node[Boolean]) = new Query[U](ut, f(ut) :: cond)
+  def where(f: U => Node[Boolean]) = new Query[W,U](ut, f(ut) :: cond)
+
+  def node: Node[Boolean] = cond.foldLeft[Node[Boolean]](ConstNode(true))(And)
+
+  def predicate: Predicate[W] = PredicateBuilder.predicate(this)
 
 }
 
 object Query {
 
-  //this alias is needed due to bug in Scala 2.7.x. It's been fixed in 2.8.0 so once we switch to it
-  //this can be removed
-  type UserType_ = UserType[_]
-
-  implicit def userType2Query[U <: UserType_](ut: U) = new Query[U](ut, Nil)
+  //This implicit conversion does not work because types are not inferred, see:
+  // http://thread.gmane.org/gmane.comp.lang.scala.user/25446
+  implicit def userType2Query[W,U <: UserType[W]](ut: U)(implicit m: Manifest[W]) =
+    new Query[W,U](ut, Nil)
 
   //a few conversions to Node[T]
-  implicit def fieldSpecOne2Node[T](fs: FieldSpecOne[_,T]) = FieldSpecOneNode(fs)
+  implicit def fieldSpecOne2Node[T:Manifest,F](fs: FieldSpecOne[T,F]) = FieldSpecOneNode(fs)
   implicit def nodeOps2Node[T](ops: NodeOps[T]) = ops.leftOperand
   implicit def const2Node[T](x: T) = ConstNode(x)
   implicit def arbitraryPredicate2Node[T](p: Predicate[T]) = PredicateNode(p)
 
   //a few lifts to traits that define operations one can apply to given Nodes.
-  implicit def fieldSpecOne2BooleanNodeOps(fs: FieldSpecOne[_,Boolean]) = new BooleanNodeOps {
-    val leftOperand = FieldSpecOneNode(fs)
-  }
-  implicit def fieldSpecOne2AllNodeOps[T](fs: FieldSpecOne[_,T]) = new AllNodeOps[T] {
+  implicit def fieldSpecOne2BooleanNodeOps[T:Manifest](fs: FieldSpecOne[T,Boolean]) =
+    new BooleanNodeOps {
+      val leftOperand = FieldSpecOneNode(fs)
+    }
+  implicit def fieldSpecOne2AllNodeOps[T:Manifest,F](fs: FieldSpecOne[T,F]) = new AllNodeOps[F] {
     val leftOperand = FieldSpecOneNode(fs)
   }
 

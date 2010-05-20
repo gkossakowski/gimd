@@ -16,12 +16,10 @@ package com.google.gimd.jgit
 
 import com.google.gimd.Snapshot
 import com.google.gimd.file.{File, FileType}
-import org.spearce.jgit.lib.{Repository, FileMode}
 import org.spearce.jgit.revwalk.RevCommit
-import org.spearce.jgit.treewalk.filter.{PathFilter, PathSuffixFilter, AndTreeFilter, TreeFilter}
 import org.spearce.jgit.treewalk.TreeWalk
 
-final class JGitSnapshot(val branch: JGitBranch, val commit: RevCommit) extends Snapshot {
+class JGitSnapshot(val branch: JGitBranch, val commit: RevCommit) extends Snapshot {
 
   def all[T](fileType: FileType[T]): Iterator[File[T]] = {
     val treeWalk = new TreeWalk(branch.repository)
@@ -29,19 +27,21 @@ final class JGitSnapshot(val branch: JGitBranch, val commit: RevCommit) extends 
     treeWalk.setRecursive(true)
     treeWalk.setFilter(FileTypeTreeFilter(fileType))
 
-    val fileIterator = new Iterator[File[T]] {
-      private var doesHasNext = treeWalk.next
-      def hasNext = doesHasNext
-      def next = {
-        if (!hasNext)
-          throw new NoSuchElementException
-        val result =
-          new JGitFile(treeWalk.getPathString, treeWalk.getObjectId(0), fileType, branch)
-        doesHasNext = treeWalk.next
-        result
-      }
+    new TreeWalkIterator(fileType, treeWalk)
+  }
+
+  protected final class TreeWalkIterator[T](val fileType: FileType[T], val treeWalk: TreeWalk)
+          extends Iterator[File[T]] {
+    private var doesHasNext = treeWalk.next
+    def hasNext = doesHasNext
+    def next = {
+      if (!hasNext)
+        throw new NoSuchElementException
+      val result =
+        new JGitFile(treeWalk.getPathString, treeWalk.getObjectId(0), fileType, branch)
+      doesHasNext = treeWalk.next
+      result
     }
-    fileIterator
   }
 
 }

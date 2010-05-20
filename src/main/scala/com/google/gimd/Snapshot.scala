@@ -15,7 +15,7 @@
 package com.google.gimd
 
 import file.{File, FileType}
-import query.{Predicate, Handle}
+import query.{Query, Predicate, Handle}
 
 trait Snapshot {
 
@@ -23,12 +23,20 @@ trait Snapshot {
    * Query database for all user objects of type U stored in files of
    * type FileType[W] satisfying predicate p.
    *
-   * @throws GimdException
+   * @deprecated use Query parameter instead
+   * @throws GimdException 
    */
   @throws(classOf[GimdException])
-  def query[U,W](ft: FileType[W], p: Predicate[U]): Iterator[(Handle[U],U)] = {
+  def query[U,W](ft: FileType[W], p: Predicate[U]): Iterator[(Handle[U],U)] =
+    queryFiles(all(ft), p)
+
+  def query[U,W](ft: FileType[W], q: Query[U,_]): Iterator[(Handle[U],U)] =
+    queryFiles(all(ft), q.predicate)
+
+  protected def queryFiles[U,W](files: Iterator[File[W]], p: Predicate[U]):
+    Iterator[(Handle[U],U)] = {
     for {
-      f <- all(ft)
+      f <- files
       r <- f.query(p)
     } yield r
   }
