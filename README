@@ -1,0 +1,57 @@
+                                          gimd
+                                  Git Message Database
+
+gimd (pronounced gim-dee) provides a small distributed database layered on top of the powerful Git
+version control system.
+
+=== Building ===
+
+Gimd recently switched to Simple Build Tool from Maven due to the fact that sbt treats 'simple' word
+seriously.
+
+You can install sbt according to these instructions:
+
+    http://code.google.com/p/simple-build-tool/wiki/Setup
+
+After you are done, enter root directory and type:
+
+$ sbt
+
+Sbt will compile project definition, download all dependencies and will enter to the interactive
+mode. In the interactive you can type different commands that sbt will execute.
+
+In order to compile Gimd jus enter: compile
+
+Consult sbt's documentation for further details:
+
+    http://code.google.com/p/simple-build-tool/wiki/DocumentationHome
+
+NOTE: Due to bug in Scala compiler (http://lampsvn.epfl.ch/trac/scala/ticket/3363) custom build of
+Scala compiler has to be used. Fortunately, sbt makes this relatively easy. You just need to
+download custom compiler build and place it in your local Maven repository (or create one if you
+happen to not be using Maven). Everything included in these three commands:
+
+$ wget http://github.com/downloads/gkossakowski/gimd/scala-compiler-2.8.0.RC2-bug3363.tar.gz
+$ mkdir -p ~/.m2/repository/org/scala-lang/
+$ tar -zxf scala-compiler-2.8.0.RC2-bug3363.tar.gz -C ~/.m2/repository/org/scala-lang/
+
+After doing that you can reference to Scala compiler version 2.8.0.r21771-b20100503184650 from
+project/build.properties
+
+=== Testing ===
+
+In sbt's interactive mode it's enough to type: test
+
+Sbt will compile all tests and execute them.
+
+Gimd uses JUnit 4.x and ScalaCheck 1.7 testing libraries at the moment.
+
+=== Contributing ===
+
+At the moment gimd is little bit in a state of flux due to Move to Scala 2.8 and sbt so contributing
+can be difficult.
+
+Anyway feel free to join http://groups.google.com/group/gimd-discuss
+
+This section will get updated as soon as there is an official Scala release that does not crash on
+gimd so contributing will become much easier.
