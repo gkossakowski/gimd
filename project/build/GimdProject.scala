@@ -13,10 +13,15 @@ import sbt._
 
 class GimdProject(info: ProjectInfo) extends DefaultProject(info) with IdeaPlugin {
   val jgitRepo = "jgit-repository" at "http://egit.googlecode.com/svn/maven/"
-  val scalaTools = "scala-tools" at "http://scala-tools.org/repo-releases"
-  val junit = "junit" % "junit" % "4.6"
   val jgit = "org.spearce" % "jgit" % "0.5.0-93-g5b89a2c"
-  val commonsIo = "commons-io" % "commons-io" % "1.3.2"
-  val scalaCheck = "org.scala-tools.testing" % "scalacheck_2.8.0.RC1" % "1.7"
+
+  val scalaTools = "scala-tools" at "http://scala-tools.org/repo-releases"
+  val scalaCheck = "org.scala-tools.testing" % "scalacheck_2.8.0.RC1" % "1.7" % "test"
+
+  val bryanjswift = "Bryan J Swift Repository" at "http://repos.bryanjswift.com/maven2/"
+  val junitInterface = "com.novocode" % "junit-interface" % "0.4.0" % "test"
+
+  val junit = "junit" % "junit" % "4.8.1" % "test"
+  val commonsIo = "commons-io" % "commons-io" % "1.3.2" % "test"
 }
 
