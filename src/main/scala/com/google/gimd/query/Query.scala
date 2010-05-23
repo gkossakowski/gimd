@@ -28,7 +28,7 @@ final class Query[W, U <: UserType[W]](val ut: U,
 
   def node: Node[Boolean] = cond.foldLeft[Node[Boolean]](ConstNode(true))(And)
 
-  def predicate: Predicate[W] = PredicateBuilder.predicate(this)
+  def predicate: Predicate[W] = PredicateBuilder(this)
 
 }
 

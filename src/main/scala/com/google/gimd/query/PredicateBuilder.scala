@@ -27,8 +27,9 @@ import reflect.Manifest
  */
 object PredicateBuilder {
 
-  def predicate[T](query: Query[T,_])(implicit m: Manifest[T]): Predicate[T] =
-    translateNode(query.node)
+  //would love if PredicateBuilder extended (Query[_,_] => Predicate[_]) but manifests make it
+  //impossible as it seems there is no type conveying the fact functions takes implicit parameters
+  def apply[T:Manifest](query: Query[T,_]): Predicate[T] = translateNode(query.node)
 
   private def translateNode[T](node: Node[_])(implicit m: Manifest[T]): Predicate[T] = {
     def extractConverter[F](n: FieldSpecOneNode[_,F]): T => F =

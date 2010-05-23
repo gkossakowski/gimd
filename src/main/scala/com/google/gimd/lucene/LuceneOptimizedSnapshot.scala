@@ -33,7 +33,7 @@ trait LuceneOptimizedSnapshot extends JGitSnapshot {
   val luceneDb: Database
 
   override def query[U,W](ft: FileType[W], q: Query[U,_]): Iterator[(Handle[U],U)] = {
-    val luceneQuery = QueryBuilder.luceneQuery(q)
+    val luceneQuery = QueryBuilder(q)
 
     def searchLucene(luceneQuery: LQuery): Iterator[File[W]] = {
       val indexReader = luceneDb.read(commit)

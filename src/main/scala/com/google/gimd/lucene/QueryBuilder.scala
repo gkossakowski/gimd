@@ -24,7 +24,7 @@ import org.apache.lucene.search.{Query => LQuery}
 /**
  * QueryBuilder which builds Lucene representation of a Gimd's query if possible.
  */
-object QueryBuilder {
+object QueryBuilder extends (Query[_,_] => Option[LQuery]) {
 
   /**
    * Builds Lucene's Query representation for a given Gimd query.
@@ -36,7 +36,7 @@ object QueryBuilder {
    * T => Boolean which is just a closure that one cannot translate but only apply on a given
    * instance of type T. 
    */
-  def luceneQuery(query: Query[_,_]): Option[LQuery] = translateNode(query.node)
+  def apply(query: Query[_,_]): Option[LQuery] = translateNode(query.node)
 
   private def translateNode(node: Node[_]): Option[LQuery] = {
     def translateIs[T](fs: FieldSpecOne[_,_], v: T): LQuery =
