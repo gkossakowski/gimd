@@ -78,7 +78,7 @@ trait LuceneOptimizedSnapshot extends JGitSnapshot {
       paths += path
     }
 
-    def getPaths = paths.toList.removeDuplicates
+    def getPaths = paths.toList.distinct
   }
 
 }
