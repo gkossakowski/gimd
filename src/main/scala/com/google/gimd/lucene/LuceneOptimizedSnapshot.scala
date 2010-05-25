@@ -40,7 +40,11 @@ trait LuceneOptimizedSnapshot extends JGitSnapshot {
       val searcher = new IndexSearcher(indexReader)
       val collector = new PathCollector
       searcher.search(luceneQuery, collector)
-      new TreeWalkIterator(ft, treeWalkWithPaths(ft, collector.getPaths))
+      val paths = collector.getPaths
+      if (paths.isEmpty)
+        Iterator.empty
+      else
+        new TreeWalkIterator(ft, treeWalkWithPaths(ft, collector.getPaths))
     }
 
     val files = luceneQuery.map(lq => searchLucene(lq)) getOrElse all(ft)
