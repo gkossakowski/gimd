@@ -16,7 +16,7 @@ package com.google.gimd
 
 import file.FileType
 import modification.DatabaseModification
-import query.Predicate
+import query.Query
 
 trait Database {
 
@@ -32,10 +32,10 @@ trait Database {
    * @throws GimdException
    */
   @throws(classOf[GimdException])
-  def query[U,W](ft: FileType[W], p: Predicate[U]): Iterator[U] =
+  def query[U,W](ft: FileType[W], q: Query[U,_]): Iterator[U] =
     //this method forgets about handles as this method is not run in context of any Snapshot so they
     //become invalid immediately
-    latestSnapshot.query(ft, p).map(_._2)
+    latestSnapshot.query(ft, q).map(_._2)
 
   /**
    * <p>The same as modifyAndReturn method but always returns Unit.</p>
