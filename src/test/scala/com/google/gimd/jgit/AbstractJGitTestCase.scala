@@ -22,7 +22,7 @@ import com.google.gimd.text.Formatter
 
 abstract class AbstractJGitTestCase {
 
-  private val repositoryPath = "test-repository/.git"
+  private val repositoryPath = "test-repository"
 
   protected val masterRef = Constants.R_HEADS + Constants.MASTER
 
@@ -35,7 +35,7 @@ abstract class AbstractJGitTestCase {
   protected val deleteRepository = true
 
   @Before protected def createRepository {
-    val file = new File(repositoryPath)
+    val file = new File(repositoryPath + "/.git")
     val repository = new Repository(file)
     masterBranch = JGitBranch(repository, masterRef)
     if (!file.exists) {
