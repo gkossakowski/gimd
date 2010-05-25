@@ -15,7 +15,8 @@
 import sbt._
 import de.element34.sbteclipsify.Eclipsify
 
-class GimdProject(info: ProjectInfo) extends DefaultProject(info) with IdeaPlugin with Eclipsify {
+class GimdProject(info: ProjectInfo) extends DefaultProject(info) with IdeaPlugin with Eclipsify
+  with PerformanceTests {
   val jgitRepo = "jgit-repository" at "http://egit.googlecode.com/svn/maven/"
   val jgit = "org.spearce" % "jgit" % "0.5.0-93-g5b89a2c"
 
@@ -28,4 +29,16 @@ class GimdProject(info: ProjectInfo) extends DefaultProject(info) with IdeaPlugi
   val junit = "junit" % "junit" % "4.8.1" % "test"
   val commonsIo = "commons-io" % "commons-io" % "1.3.2" % "test"
   val lucene = "org.apache.lucene" % "lucene-core" % "3.0.0"
+}
+
+/**
+ * A trait that adds 'perf-test' task that executed performance tests.
+ *
+ * Performance tests are identified by having "PerfTest" suffix in their name.
+ */
+trait PerformanceTests extends BasicScalaProject {
+  override def testOptions = TestFilter(!_.endsWith("PerfTest")) :: super.testOptions.toList
+  val perfOptions = TestFilter(_ endsWith "PerfTest") :: TestListeners(testListeners) :: Nil
+  lazy val perfTest = defaultTestTask(perfOptions) describedAs ("Runs all performance tests " +
+          "detected during compilation.")
 }
