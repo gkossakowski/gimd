@@ -22,7 +22,7 @@ class ParserPerfTest extends PerfTest {
     import com.google.gimd.RandomTreeGenerator
     import com.google.gimd.TestTree.Node1Type
     val gen = new RandomTreeGenerator(rnd)
-    val msgs = Iterator.continually(Node1Type.toMessage(gen.generateNode1()))
+    val msgs = Iterator.continually(Node1Type.toMessage(gen.generateNode1(gen.names, gen.ids)))
     msgs.find(messageRank(_) > minRank)
   }
 

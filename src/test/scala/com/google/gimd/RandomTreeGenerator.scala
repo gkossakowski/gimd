@@ -24,50 +24,51 @@ import TestTree._
 class RandomTreeGenerator(val rnd: Random) {
 
   protected val MAX_CHILD_NODES = 3
-  protected val MAX_DISTINCT_NAMES = 10000
   protected val MAX_NAME_LENGTH = 20
-  protected val MAX_DISTINCT_IDS = 10000
-  protected val MAX_ID = 1000000
-  private val MAX_DEPTH = 5
+  protected val MAX_ID = 10000000
+  protected val MAX_DEPTH = 5
 
-  lazy val names = for (_ <- (1 to MAX_DISTINCT_NAMES)) yield
-    nextASCIIString(rnd, 1 + rnd.nextInt(MAX_NAME_LENGTH))
-  lazy val ids = for (_ <- (1 to MAX_DISTINCT_IDS)) yield rnd.nextInt(MAX_ID)
+  val names = Stream.continually(nextASCIIString(rnd, 1 + rnd.nextInt(MAX_NAME_LENGTH))).distinct
+  val ids = Stream.continually(rnd.nextInt(MAX_ID)).distinct
 
-  def generate(maxNumberOfNodes: Int): (List[Node1], List[Node2]) = {
-    val nodes1 = for (_ <- (1 to maxNumberOfNodes)) yield generateNode1(MAX_DEPTH)
-    val nodes2 = for (_ <- (1 to maxNumberOfNodes)) yield generateNode2(MAX_DEPTH)
+  def generate(n: Int): (List[Node1], List[Node2]) = {
+    //should splitAt be used here but it does not terminate:
+    //http://lampsvn.epfl.ch/trac/scala/ticket/3496
+    val (topNames, restNames) = (names take n, names drop n)
+    val (topIds, restIds) = (ids take n, ids drop n)
+    val nodes1 = for (name <- topNames) yield generateNode1(name +: restNames, ids, MAX_DEPTH)
+    val nodes2 = for (id <- topIds) yield generateNode2(names, id +: restIds, MAX_DEPTH)
     (nodes1.toList, nodes2.toList)
   }
 
-  def generateNode1(depth: Int = MAX_DEPTH): Node1 = {
-    val name = names(rnd.nextInt(names.size))
+  def generateNode1(names: Stream[String], ids: Stream[Int], depth: Int = MAX_DEPTH): Node1 = {
+    val name = names.head
     val nodes1 =
       if (depth > 0)
         for (_ <- (0 to (rnd.nextInt(MAX_CHILD_NODES))).toList) yield
-          generateNode1(rnd.nextInt(depth))
+          generateNode1(names.tail, ids, rnd.nextInt(depth))
       else Nil
 
     val nodes2 =
       if (depth > 0)
         for (_ <- (0 to (rnd.nextInt(MAX_CHILD_NODES))).toList) yield
-          generateNode2(rnd.nextInt(depth))
+          generateNode2(names.tail, ids, rnd.nextInt(depth))
       else Nil
     Node1(name, nodes1.toList, nodes2.toList)
   }
 
-  def generateNode2(depth: Int = MAX_DEPTH): Node2 = {
-    val id = ids(rnd.nextInt(ids.size))
+  def generateNode2(names: Stream[String], ids: Stream[Int], depth: Int = MAX_DEPTH): Node2 = {
+    val id = ids.head
     val nodes1 =
       if (depth > 0)
         for (_ <- (0 to (rnd.nextInt(MAX_CHILD_NODES))).toList) yield
-          generateNode1(rnd.nextInt(depth))
+          generateNode1(names, ids.tail, rnd.nextInt(depth))
       else Nil
 
     val nodes2 =
       if (depth > 0)
         for (_ <- (0 to (rnd.nextInt(MAX_CHILD_NODES))).toList) yield
-          generateNode2(rnd.nextInt(depth))
+          generateNode2(names, ids.tail, rnd.nextInt(depth))
       else Nil
     Node2(id, nodes1.toList, nodes2.toList)
   }
