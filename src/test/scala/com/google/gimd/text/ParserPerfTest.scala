@@ -28,7 +28,7 @@ class ParserPerfTest extends PerfTest {
 
   @Test
   def parse {
-    val minRank = 100
+    val minRank = 150
     val msg = generateMessage(new util.Random(101), minRank) match {
       case Some(msg) => msg
       case None => error("Failed to find message with rank above %d".format(minRank))
