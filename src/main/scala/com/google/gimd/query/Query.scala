@@ -40,9 +40,10 @@ object Query {
     new Query[W,U](ut, Nil)
 
   //a few conversions to Node[T]
-  implicit def fieldSpecOne2Node[T:Manifest,F](fs: FieldSpecOne[T,F]) = FieldSpecOneNode(fs)
+  implicit def fieldSpecOne2Node[T:Manifest,F:Ordering](fs: FieldSpecOne[T,F]) =
+    FieldSpecOneNode(fs)
   implicit def nodeOps2Node[T](ops: NodeOps[T]) = ops.leftOperand
-  implicit def const2Node[T](x: T) = ConstNode(x)
+  implicit def const2Node[T:Ordering](x: T) = ConstNode(x)
   implicit def arbitraryPredicate2Node[T](p: Predicate[T]) = PredicateNode(p)
 
   //a few lifts to traits that define operations one can apply to given Nodes.
@@ -50,14 +51,15 @@ object Query {
     new BooleanNodeOps {
       val leftOperand = FieldSpecOneNode(fs)
     }
-  implicit def fieldSpecOne2AllNodeOps[T:Manifest,F](fs: FieldSpecOne[T,F]) = new AllNodeOps[F] {
+  implicit def fieldSpecOne2AllNodeOps[T:Manifest,F:Ordering](fs: FieldSpecOne[T,F]) =
+    new AllNodeOps[F] {
     val leftOperand = FieldSpecOneNode(fs)
   }
 
   implicit def booleanConst2BooleanNodeOps(x: Boolean) = new BooleanNodeOps {
     val leftOperand = ConstNode(x)
   }
-  implicit def const2AllNodeOps[T](x: T) = new AllNodeOps[T] {
+  implicit def const2AllNodeOps[T:Ordering](x: T) = new AllNodeOps[T] {
     val leftOperand = ConstNode(x)
   }
 

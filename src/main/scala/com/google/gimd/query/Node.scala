@@ -24,13 +24,20 @@ import com.google.gimd.FieldSpecOne
  * However, Node does not track the type of UserType so it's possible that Node's
  * expression would be applied to wrong instance. This will be fixed in a future.
  */
-abstract class Node[T]
+abstract class Node[T:Ordering] {
+  /**
+   * Since all primitive types stored in Gimd have natural order defined we can require ordering
+   * for every kind of type we get. By using context bound for T (T:Ordering) we require that there
+   * is implicit Ordering provided.
+   */
+  val ordering: Ordering[T] = implicitly
+}
 
 /**
  * Node that stores FieldSpec. This node acts as placeholder in query for a given field of specific instance
  * defined by UserType.
  */
-final case class FieldSpecOneNode[T:Manifest,F](val fieldSpecOne: FieldSpecOne[T,F])
+final case class FieldSpecOneNode[T:Manifest,F:Ordering](val fieldSpecOne: FieldSpecOne[T,F])
         extends Node[F] {
   val manifest: Manifest[T] = implicitly
 }
@@ -38,7 +45,7 @@ final case class FieldSpecOneNode[T:Manifest,F](val fieldSpecOne: FieldSpecOne[T
 /**
  * Node that holds a constant value of type T.
  */
-final case class ConstNode[T](val value: T) extends Node[T]
+final case class ConstNode[T:Ordering](val value: T) extends Node[T]
 
 /**
  * Node that holds Predicate which (in turn) holds arbitrary function T => Boolean where T is a type

@@ -14,9 +14,9 @@
 package com.google.gimd.query
 
 import com.google.gimd.FieldSpecOne
-import com.google.gimd.query.AllNodeOps.Is
-import com.google.gimd.query.BooleanNodeOps.{Or, And}
 import reflect.Manifest
+import com.google.gimd.query.AllNodeOps.{Relational, Is}
+import com.google.gimd.query.BooleanNodeOps.{Not, Or, And}
 
 /**
  * PredicateBuilder is an object that transforms Query AST into Predicate instance.
@@ -47,13 +47,24 @@ object PredicateBuilder {
     def translateOr(left: Predicate[T], right: Predicate[T]): Predicate[T] =
       Predicate(x => left.isMatch(x) || right.isMatch(x))
 
+    def negatePredicate(p: Predicate[T]): Predicate[T] = Predicate(!p.isMatch(_))
+
     node match {
       case Is(n @ FieldSpecOneNode(_), ConstNode(v)) => translateIs(extractConverter(n), v)
       case Is(ConstNode(v), n @ FieldSpecOneNode(_)) => translateIs(extractConverter(n), v)
       case And(left, right) => translateAnd(translateNode(left), translateNode(right))
       case Or(left, right) => translateOr(translateNode(left), translateNode(right))
       case ConstNode(true) => Predicate(_ => true)
-      case _ => error("anything else is not supported at the moment")
+      case Not(left) => negatePredicate(translateNode(left))
+      case Relational("<", n @ FieldSpecOneNode(_), ConstNode(v)) => {
+        val f = extractConverter(n)
+        Predicate(x => n.ordering.lt(f(x), v))
+      }
+      case Relational("<", ConstNode(v), n @ FieldSpecOneNode(_)) => {
+        val f = extractConverter(n)
+        Predicate(x => n.ordering.lt(v, f(x)))
+      }
+      case x => error(x + "anything else is not supported at the moment")
     }
   }
 
