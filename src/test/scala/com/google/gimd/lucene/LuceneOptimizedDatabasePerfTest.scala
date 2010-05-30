@@ -49,12 +49,45 @@ class LuceneOptimizedDatabasePerfTest extends AbstractJGitTestCase with PerfTest
   }
 
   @Test
-  def measureQueryTime {
+  def measureEqQueryTime {
+    println("Measuring 'equality' query time.")
     val db = createDatabase
     generateNodes(db)
     import com.google.gimd.query.Query._
     val q1 = Node1Type.query where { _.name === "GqfDGUe" }
     val q2 = Node2Type.query where { _.id === 114528 }
+    val a1 = () => {
+      db.latestSnapshot.query(Node1FileType, q1).toList
+      db.latestSnapshot.query(Node2FileType, q2).toList
+      ()
+    }
+    val a2 = () => {
+      db.latestSnapshot.query(Node1FileType, q1.predicate).toList
+      db.latestSnapshot.query(Node2FileType, q2.predicate).toList
+      ()
+    }
+
+    println("warming up")
+    for (_ <- 1 to 5) a1()
+    for (_ <- 1 to 5) a2()
+
+    val N = 100
+
+    println("Measuring with Lucene enabled")
+    println(formatInfo("query with Lucene enabled", measureTime(N, a1)))
+
+    println("Measuring without Lucene enabled")
+    println(formatInfo("query without Lucene enabled", measureTime(N, a2)))
+  }
+
+  @Test
+  def measureLtQueryTime {
+    println("Measuring 'less than' query time.")
+    val db = createDatabase
+    generateNodes(db)
+    import com.google.gimd.query.Query._
+    val q1 = Node1Type.query where { _.name < "aaa" }
+    val q2 = Node2Type.query where { _.id < 100 }
     val a1 = () => {
       db.latestSnapshot.query(Node1FileType, q1).toList
       db.latestSnapshot.query(Node2FileType, q2).toList
