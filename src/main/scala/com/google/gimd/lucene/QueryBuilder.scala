@@ -13,13 +13,13 @@
 // limitations under the License.
 package com.google.gimd.lucene
 
-import com.google.gimd.query.AllNodeOps.Is
 import com.google.gimd.query.{ConstNode, FieldSpecOneNode, Query, Node}
 import com.google.gimd.FieldSpecOne
 import org.apache.lucene.index.Term
-import com.google.gimd.query.BooleanNodeOps.{Or, And}
 import org.apache.lucene.search._
 import org.apache.lucene.search.{Query => LQuery}
+import com.google.gimd.query.AllNodeOps.{Relational, Is}
+import com.google.gimd.query.BooleanNodeOps.{Not, Or, And}
 
 /**
  * QueryBuilder which builds Lucene representation of a Gimd's query if possible.
@@ -61,7 +61,36 @@ object QueryBuilder extends (Query[_,_] => Option[LQuery]) {
       q
     }
 
+    def translateRelational(r: Relational[_], includeBound: Boolean): Option[TermRangeQuery] =
+      r match {
+        case Relational("<", FieldSpecOneNode(fs), ConstNode(v)) =>
+          //FIXME: See the comment in translateIs above
+          Some(new TermRangeQuery(fs.name, null, v.toString, false, includeBound))
+      }
+
+    def translateRelationalOrIs(r: Relational[_], i: Is[_]): Option[TermRangeQuery] ={
+      def matchIs(i: Is[_], left: FieldSpecOneNode[_,_], right: ConstNode[_]) = i match {
+        case Is(l, r) if (l == left && r == right) => true
+        case _ => false
+      }
+      r match {
+        case Relational("<", left: FieldSpecOneNode[_,_], right: ConstNode[_])
+          if matchIs(i, left, right) => translateRelational(r, true)
+      }
+    }
+
     node match {
+      case Or(r : Relational[_], i : Is[_]) => translateRelationalOrIs(r, i)
+      case Or(i : Is[_], r : Relational[_]) => translateRelationalOrIs(r, i)
+      case Not(r: Relational[_]) => translateRelational(r, false) map { x =>
+        //'!<' is the same as '>='
+        new TermRangeQuery(x.getField, x.getUpperTerm, null, true, false)
+      }
+      case And(Not(r: Relational[_]), Not(i: Is[_])) => translateRelationalOrIs(r, i) map { x =>
+        //'!< && !=' is the same as '>'
+        new TermRangeQuery(x.getField, x.getUpperTerm, null, false, false)
+      }
+      case r: Relational[_] => translateRelational(r, false)
       case Is(FieldSpecOneNode(fs), ConstNode(v)) => Some(translateIs(fs, v))
       case Is(ConstNode(v), FieldSpecOneNode(fs)) => Some(translateIs(fs, v))
       case And(left, right) => for {
