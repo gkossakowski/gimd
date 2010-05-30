@@ -46,7 +46,8 @@ trait LuceneOptimizedSnapshot extends JGitSnapshot {
       else
         new TreeWalkIterator(ft, treeWalkWithPaths(ft, collector.getPaths))
     }
-
+    if (luceneQuery.isEmpty)
+      println("Failed to obtain Lucene query for query: \n" + q)
     val files = luceneQuery.map(lq => searchLucene(lq)) getOrElse all(ft)
 
     queryFiles(files, q.predicate)

@@ -30,6 +30,8 @@ final class Query[W, U <: UserType[W]](val ut: U,
 
   def predicate: Predicate[W] = PredicateBuilder(this)
 
+  override def toString = "Query(%s, %s)".format(ut.toString, cond.toString)
+
 }
 
 object Query {
