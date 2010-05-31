@@ -36,6 +36,22 @@ Sbt will compile all tests and execute them.
 
 Gimd uses JUnit 4.x and ScalaCheck 1.7 testing libraries at the moment.
 
+=== Running sample ===
+
+In sbt's interactive mode switch to console by typing: console
+
+Once you are in Scala's REPL (with Gimd's libraries loaded) load sample script by typing:
+
+:load sample.scala
+
+It will load sample script that defines some custom class and it's binding to Gimd's data
+structures, adds some sample data and executes some queries.
+
+You can play with your db by doing some more complex queries, e.g.:
+
+scala> db.query(MyUserFileType, MyUserType.query where { x => (x.age === 0) && (x.name < "user20") }) foreach println
+User(user182,email182@com.com,0)
+
 === Contributing ===
 
 At the moment gimd is little bit in a state of flux due to Move to Scala 2.8 and sbt so contributing
