@@ -52,6 +52,9 @@ final class Indexer(db: Database, fileTypes: List[FileType[_]]) {
     if (IndexReader.indexExists(lucDb))
       throw new IOException("index already exists, cannot do full")
     writer = new IndexWriter(lucDb, analyzer, true, deletePolicy, fieldLen)
+    //this is dummy command that enforces commit when there are no other changes to commit
+    //i.e. in case of indexing an empty repository
+    writer.deleteAll();
     for (ft <- fileTypes) {
       tree.reset(target.getTree)
       tree.setFilter(FileTypeTreeFilter(ft))
@@ -74,12 +77,12 @@ final class Indexer(db: Database, fileTypes: List[FileType[_]]) {
     writer = new IndexWriter(lucDb, analyzer, deletePolicy, fieldLen, ic)
     val base: RevCommit = walk.parseCommit(state)
     for (ft <- fileTypes) {
-      tree.reset(Array[AnyObjectId](base.getTree, target.getTree))
+      tree.reset(Array[AnyObjectId](target.getTree, base.getTree))
       tree.setFilter(AndTreeFilter.create(TreeFilter.ANY_DIFF, FileTypeTreeFilter(ft)))
       tree.setRecursive(true)
       while (tree.next) {
-        val baseMode: Int = tree.getRawMode(0)
-        val targetMode: Int = tree.getRawMode(1)
+        val targetMode: Int = tree.getRawMode(0)
+        val baseMode: Int = tree.getRawMode(1)
         if (baseMode != 0 && targetMode == 0) {
           writer.deleteDocuments(new Term(PATH_NAME, tree.getPathString))
         }

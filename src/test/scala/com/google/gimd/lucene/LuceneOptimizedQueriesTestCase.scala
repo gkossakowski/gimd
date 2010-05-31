@@ -85,4 +85,18 @@ class LuceneOptimizedQueriesTestCase extends AbstractJGitTestCase {
     assertEquals(4, db.query(Node2FileType, q).size)
   }
 
+  @Test
+  def fullAndIncrementalIndexing {
+    val db = createDatabase
+    db.modify { s =>
+      //this query forces empty index creation
+      if (s.query(Node1FileType, Node1Type.query).isEmpty) {
+        println("adding")
+        DatabaseModification.empty.insertFile(Node1FileType, Node1("node", Nil, Nil))
+      } else DatabaseModification.empty
+    }
+    //this query executes incremental indexing
+    assertEquals(1, db.query(Node1FileType, Node1Type.query).size)
+  }
+
 }
