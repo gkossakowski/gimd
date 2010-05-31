@@ -9,16 +9,18 @@ version control system.
 Gimd recently switched to Simple Build Tool from Maven due to the fact that sbt treats 'simple' word
 seriously.
 
-You can install sbt according to these instructions:
+Enter root directory and type:
 
-    http://code.google.com/p/simple-build-tool/wiki/Setup
+$ ./sbt update
 
-After you are done, enter root directory and type:
+Sbt will compile project definition and download all dependencies.
 
-$ sbt
+Once it's done type:
 
-Sbt will compile project definition, download all dependencies and will enter to the interactive
-mode. In the interactive you can type different commands that sbt will execute.
+$ ./sbt
+
+Sbt will enter to the interactive mode. In the interactive you can type different commands that sbt
+will execute.
 
 In order to compile Gimd jus enter: compile
 
