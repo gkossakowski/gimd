@@ -50,6 +50,15 @@ class LuceneOptimizedQueriesTestCase extends AbstractJGitTestCase {
   }
 
   @Test
+  def eqIntQuery {
+    val db = createDatabase
+    createNodes(db)
+    import com.google.gimd.query.Query._
+    val q = Node2Type.query where { _.id === 2 }
+    assertEquals(1, db.query(Node2FileType, q).size)
+  }
+
+  @Test
   def nameLessThanQuery {
     val db = createDatabase
     createNodes(db)
