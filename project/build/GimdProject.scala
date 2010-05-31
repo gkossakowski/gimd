@@ -18,7 +18,7 @@ import de.element34.sbteclipsify.Eclipsify
 class GimdProject(info: ProjectInfo) extends DefaultProject(info) with IdeaPlugin with Eclipsify
   with PerformanceTests {
   val jgitRepo = "jgit-repository" at "http://egit.googlecode.com/svn/maven/"
-  val jgit = "org.spearce" % "jgit" % "0.5.0-93-g5b89a2c"
+  val jgit = "org.spearce" % "jgit" % "0.5.0-93-g5b89a2c" withSources()
 
   val scalaTools = "scala-tools" at "http://scala-tools.org/repo-releases"
   val scalaCheck = ("org.scala-tools.testing" % "scalacheck_2.8.0.RC3" % "1.8-SANPSHOT" % "test"
@@ -29,8 +29,8 @@ class GimdProject(info: ProjectInfo) extends DefaultProject(info) with IdeaPlugi
   val junitInterface = "com.novocode" % "junit-interface" % "0.4.0" % "test"
 
   val junit = "junit" % "junit" % "4.8.1" % "test"
-  val commonsIo = "commons-io" % "commons-io" % "1.3.2" % "test"
-  val lucene = "org.apache.lucene" % "lucene-core" % "3.0.0"
+  val commonsIo = "commons-io" % "commons-io" % "1.3.2" % "test" withSources()
+  val lucene = "org.apache.lucene" % "lucene-core" % "3.0.0" withSources()
 }
 
 /**
