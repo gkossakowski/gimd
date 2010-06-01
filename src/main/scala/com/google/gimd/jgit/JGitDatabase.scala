@@ -49,8 +49,7 @@ class JGitDatabase(val fileTypes: List[FileType[_]], val branch: JGitBranch) ext
 
   def latestSnapshot: JGitSnapshot = {
     try {
-      val id = repository.resolve(branch.name)
-      new JGitSnapshot(branch, new RevWalk(repository).parseCommit(id))
+      new JGitSnapshot(branch, latestCommitId)
     } catch {
       case e: IOException => throw new JGitDatabaseException(branch, e)
     }
@@ -90,6 +89,14 @@ class JGitDatabase(val fileTypes: List[FileType[_]], val branch: JGitBranch) ext
         throw new JGitDatabaseException(branch,
                                         "RefUpdate returned unexpected result: %1s.".format(result))
     }
+  }
+
+  /**
+   * Returns latest commit id that our branch is pointing at.
+   */
+  protected def latestCommitId: RevCommit = {
+    val id = repository.resolve(branch.name)
+    new RevWalk(repository).parseCommit(id)
   }
 
   private def updateRef(oldCommit: ObjectId, newCommit: ObjectId): Result = {

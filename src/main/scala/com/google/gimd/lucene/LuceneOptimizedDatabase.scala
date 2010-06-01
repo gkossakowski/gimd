@@ -19,12 +19,12 @@ import org.spearce.jgit.revwalk.RevWalk
 
 trait LuceneOptimizedDatabase extends JGitDatabase {
 
+  protected val luceneDb = new Database(branch, fileTypes)
+
   override def latestSnapshot: JGitSnapshot = {
     try {
-      val id = repository.resolve(branch.name)
-      new JGitSnapshot(branch, new RevWalk(repository).parseCommit(id))
-              with LuceneOptimizedSnapshot {
-        val luceneDb = new Database(branch, fileTypes)
+      new JGitSnapshot(branch, latestCommitId) with LuceneOptimizedSnapshot {
+        val luceneDb = LuceneOptimizedDatabase.this.luceneDb
       }
     } catch {
       case e: IOException => throw new JGitDatabaseException(branch, e)
