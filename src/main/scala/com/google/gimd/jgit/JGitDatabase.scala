@@ -15,17 +15,15 @@
 package com.google.gimd.jgit
 
 import com.google.gimd.{Database, Message, Snapshot}
-import com.google.gimd.file.{FileType, File}
+import com.google.gimd.file.FileType
 import com.google.gimd.modification.DatabaseModification
 import com.google.gimd.text.Formatter
-import java.io.{IOException, ByteArrayInputStream}
 import org.spearce.jgit.lib._
 import org.spearce.jgit.merge.MergeStrategy
 import org.spearce.jgit.lib.RefUpdate.Result
 import org.spearce.jgit.dircache.{DirCache, DirCacheEditor, DirCacheEntry}
 import org.spearce.jgit.revwalk.{RevCommit, RevTree, RevWalk}
-import com.google.gimd.{Database, Snapshot}
-import com.google.gimd.Message
+import java.io.IOException
 
 class JGitDatabase(val fileTypes: List[FileType[_]], val branch: JGitBranch) extends Database {
 
