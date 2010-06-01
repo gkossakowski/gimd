@@ -55,15 +55,16 @@ class JGitDatabase(val fileTypes: List[FileType[_]], val branch: JGitBranch) ext
     }
   }
 
-  def modifyAndReturn[T](modification: Snapshot => (DatabaseModification, T)): T = {
+  def modifyAndReturn[T](modification: Snapshot => (DatabaseModification, T)): T =
+    modifyAndReturnWithCommit(modification)._1
+
+  protected def modifyAndReturnWithCommit[T](modification: Snapshot => (DatabaseModification, T)):
+  (T, ObjectId) = {
     val result = try {
       retry(MERGE_RETRIES) {
         val snapshot = latestSnapshot
         val (dbModification, result) = modification(snapshot)
-        applyModification(dbModification, snapshot.commit) match {
-          case true => Some(result)
-          case false => None
-        }
+        applyModification(dbModification, snapshot.commit).map((result, _))
       }
     } catch {
       case e: IOException => throw new JGitDatabaseException(branch, e)
@@ -72,14 +73,13 @@ class JGitDatabase(val fileTypes: List[FileType[_]], val branch: JGitBranch) ext
     result getOrElse { throw new JGitMergeRetriesExceededException(branch, MERGE_RETRIES) }
   }
 
-  def applyModification(modification: DatabaseModification, onto: RevCommit):
-    Boolean = {
+  def applyModification(modification: DatabaseModification, onto: RevCommit): Option[ObjectId] = {
     val treeId = writeMessages(modification, onto.getTree)
     val commitId = createCommit(treeId, onto)
     val result = updateRef(onto, commitId)
     result match {
       //there was no change to database since onto commit so changes were applied cleanly
-      case Result.FAST_FORWARD => true
+      case Result.FAST_FORWARD => Some(commitId)
       //if there was a change since onto commit update gets rejected. Still it might be that change
       //did not affected files we are trying to modify. Thus we are trying merging both changes.
       case Result.REJECTED => tryMerging(commitId)
@@ -155,20 +155,20 @@ class JGitDatabase(val fileTypes: List[FileType[_]], val branch: JGitBranch) ext
     dirCache.writeTree(objectWriter)
   }
 
-  private def merge(commitToBeMerged: ObjectId): Boolean = {
+  private def merge(commitToBeMerged: ObjectId): Option[ObjectId] = {
     val baseCommit = repository.resolve(branch.name)
     val merger = MergeStrategy.SIMPLE_TWO_WAY_IN_CORE.newMerger(repository)
     if (merger.merge(baseCommit, commitToBeMerged)) {
       val treeId = merger.getResultTreeId
       val mergeCommit = createCommit(treeId, baseCommit, commitToBeMerged)
       val result = updateRef(baseCommit, mergeCommit)
-      Result.FAST_FORWARD == result
+      if (Result.FAST_FORWARD == result) Some(mergeCommit) else None
     } else
-      false
+      None
   }
 
-  private def tryMerging(commitToBeMerged: ObjectId) =
-    retry(MERGE_RETRIES){ Some(merge(commitToBeMerged)) } getOrElse false
+  private def tryMerging(commitToBeMerged: ObjectId): Option[ObjectId] =
+    retry(MERGE_RETRIES){ merge(commitToBeMerged) }
 
   private def retry[T](howManyTimes: Int)(what: => Option[T]): Option[T] =
     if (howManyTimes > 0)
