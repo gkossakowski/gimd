@@ -14,7 +14,7 @@
 package com.google.gimd.lucene
 
 import com.google.gimd.query.{Handle, Query}
-import org.spearce.jgit.treewalk.TreeWalk
+import org.eclipse.jgit.treewalk.TreeWalk
 import com.google.gimd.jgit.{FileTypeTreeFilter, JGitSnapshot}
 import com.google.gimd.file.{File, FileType}
 import org.apache.lucene.search.{Scorer, Collector, IndexSearcher, Query => LQuery}
@@ -54,7 +54,7 @@ trait LuceneOptimizedSnapshot extends JGitSnapshot {
   }
 
   private def treeWalkWithPaths[W](ft: FileType[W], paths: List[String]): TreeWalk = {
-    import org.spearce.jgit.treewalk.filter.{PathFilterGroup, AndTreeFilter}
+    import org.eclipse.jgit.treewalk.filter.{PathFilterGroup, AndTreeFilter}
     val treeWalk = new TreeWalk(branch.repository)
     treeWalk.reset(commit.getTree)
     treeWalk.setRecursive(true)

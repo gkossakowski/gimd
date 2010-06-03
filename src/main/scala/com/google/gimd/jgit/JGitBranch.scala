@@ -14,7 +14,7 @@
 
 package com.google.gimd.jgit
 
-import org.spearce.jgit.lib.Repository
+import org.eclipse.jgit.lib.Repository
 
 /**
  * <p>Class that stores information about branch which consists of name of branch and repository

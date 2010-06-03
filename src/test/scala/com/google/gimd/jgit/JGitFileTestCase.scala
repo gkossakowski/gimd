@@ -17,7 +17,7 @@ package com.google.gimd.jgit
 import com.google.gimd._
 import com.google.gimd.UserType._
 import com.google.gimd.file.FileType
-import org.spearce.jgit.lib.ObjectId
+import org.eclipse.jgit.lib.ObjectId
 import org.junit.Test
 import junit.framework.Assert._
 import text.Formatter

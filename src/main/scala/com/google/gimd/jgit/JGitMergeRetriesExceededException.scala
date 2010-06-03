@@ -14,7 +14,7 @@
 
 package com.google.gimd.jgit
 
-import org.spearce.jgit.lib.Repository
+import org.eclipse.jgit.lib.Repository
 
 /**
  * An exception thrown in a case when modifications cannot be applied to JGitDatabase.

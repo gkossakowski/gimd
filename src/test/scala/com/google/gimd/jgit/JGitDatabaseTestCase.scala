@@ -19,7 +19,7 @@ import com.google.gimd.UserType._
 import com.google.gimd.file.{File, FileType}
 import com.google.gimd.modification.DatabaseModification
 import com.google.gimd.query.Predicate
-import org.spearce.jgit.lib.{Constants, ObjectId}
+import org.eclipse.jgit.lib.{Constants, ObjectId}
 import com.google.gimd.query.Query._
 import org.junit.Test
 import org.junit.Assert._
@@ -88,14 +88,14 @@ final class JGitDatabaseTestCase extends AbstractJGitTestCase {
 
   @Test
   def allFilterRegularFilesOnly {
-    val dc = org.spearce.jgit.dircache.DirCache.newInCore
+    val dc = org.eclipse.jgit.dircache.DirCache.newInCore
     val builder = dc.builder
-    val entry = new org.spearce.jgit.dircache.DirCacheEntry("sm/exec.sm")
-    entry.setFileMode(org.spearce.jgit.lib.FileMode.EXECUTABLE_FILE)
+    val entry = new org.eclipse.jgit.dircache.DirCacheEntry("sm/exec.sm")
+    entry.setFileMode(org.eclipse.jgit.lib.FileMode.EXECUTABLE_FILE)
     entry.setObjectId(writeTextContent("text content"))
     builder.add(entry)
     builder.finish()
-    val treeId = dc.writeTree(new org.spearce.jgit.lib.ObjectWriter(masterBranch.repository))
+    val treeId = dc.writeTree(new org.eclipse.jgit.lib.ObjectWriter(masterBranch.repository))
     val commitId = createCommit("Test commit", treeId)
     moveMaster(commitId)
 

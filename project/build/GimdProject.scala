@@ -17,8 +17,8 @@ import de.element34.sbteclipsify.Eclipsify
 
 class GimdProject(info: ProjectInfo) extends DefaultProject(info) with IdeaPlugin with Eclipsify
   with PerformanceTests {
-  val jgitRepo = "jgit-repository" at "http://egit.googlecode.com/svn/maven/"
-  val jgit = "org.spearce" % "jgit" % "0.5.0-93-g5b89a2c" withSources()
+  val jgitRepo = "jgit-repository" at "http://download.eclipse.org/jgit/maven"
+  val jgit = "org.eclipse.jgit" % "org.eclipse.jgit" % "0.7.1" withSources()
 
   val scalaTools = "scala-tools" at "http://scala-tools.org/repo-releases"
   val scalaCheck = ("org.scala-tools.testing" % "scalacheck_2.8.0.RC3" % "1.8-SANPSHOT" % "test"

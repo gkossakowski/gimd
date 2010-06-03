@@ -45,11 +45,11 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.0.RC3/compile/jgit-0.5.0-93-g5b89a2c.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.0.RC3/compile/org.eclipse.jgit-0.7.1.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.0.RC3/compile/jgit-0.5.0-93-g5b89a2c-sources.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.0.RC3/compile/org.eclipse.jgit-0.7.1-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
@@ -61,6 +61,26 @@
         <JAVADOC />
         <SOURCES>
           <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.0.RC3/test/commons-io-1.3.2-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.0.RC3/compile/jsch-0.1.41.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.0.RC3/compile/org.eclipse.jgit-0.7.1.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.0.RC3/compile/org.eclipse.jgit-0.7.1-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
@@ -87,21 +107,21 @@
     <orderEntry type="module-library" exported="" scope="TEST">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.0.RC3/test/scalacheck_2.8.0.RC3-1.8-SANPSHOT.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library" exported="" scope="TEST">
-      <library>
-        <CLASSES>
           <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.0.RC3/test/commons-io-1.3.2.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
           <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.0.RC3/test/commons-io-1.3.2-sources.jar!/" />
         </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="" scope="TEST">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.0.RC3/test/scalacheck_2.8.0.RC3-1.8-SANPSHOT.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
       </library>
     </orderEntry>
     <orderEntry type="module-library" exported="" scope="TEST">
@@ -117,26 +137,6 @@
       <library>
         <CLASSES>
           <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.0.RC3/test/junit-4.8.1.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library" exported="">
-      <library>
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.0.RC3/compile/jgit-0.5.0-93-g5b89a2c.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES>
-          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.0.RC3/compile/jgit-0.5.0-93-g5b89a2c-sources.jar!/" />
-        </SOURCES>
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library" exported="">
-      <library>
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.0.RC3/compile/jsch-0.1.38.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />

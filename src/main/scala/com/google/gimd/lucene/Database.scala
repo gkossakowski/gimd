@@ -15,8 +15,7 @@ package com.google.gimd.lucene
 
 import org.apache.lucene.store.Directory
 import org.apache.lucene.index.{IndexCommit, IndexReader}
-import org.spearce.jgit.revwalk.{RevCommit, RevWalk}
-import org.spearce.jgit.lib.{ObjectIdSubclassMap, ObjectId, AnyObjectId}
+import org.eclipse.jgit.revwalk.{RevCommit, RevWalk}
 
 import com.google.gimd.lucene.Database.{UD_COMMIT, LuceneState}
 import org.apache.lucene.analysis.SimpleAnalyzer
@@ -105,7 +104,7 @@ final class Database(val branch: JGitBranch, val fileTypes: List[FileType[_]]) {
 
   private def scan(ldb: Directory): ObjectIdSubclassMap[LuceneState] = {
     val r: ObjectIdSubclassMap[LuceneState] = new ObjectIdSubclassMap[LuceneState]
-    import org.spearce.jgit.lib.MutableObjectId
+    import org.eclipse.jgit.lib.MutableObjectId
     val id: MutableObjectId = new MutableObjectId
     for (c <- list(ldb)) {
       val userData: java.util.Map[String, String] = c.getUserData

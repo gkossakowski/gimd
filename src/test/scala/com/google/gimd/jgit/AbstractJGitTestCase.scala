@@ -15,7 +15,7 @@
 package com.google.gimd.jgit
 
 import com.google.gimd.UserType
-import org.spearce.jgit.lib._
+import org.eclipse.jgit.lib._
 import org.junit.{After, Before}
 import java.io.{ByteArrayInputStream, IOException, File}
 import com.google.gimd.text.Formatter
@@ -61,11 +61,11 @@ abstract class AbstractJGitTestCase {
     writeTextContent(Formatter.format(userType.toMessageBuffer(userObject).readOnly))
 
   protected def addFiles(files: List[(String, ObjectId)]): ObjectId = {
-    val dc = org.spearce.jgit.dircache.DirCache.newInCore
+    val dc = org.eclipse.jgit.dircache.DirCache.newInCore
     val builder = dc.builder
     for ((path, blobId) <- files) {
-      val entry = new org.spearce.jgit.dircache.DirCacheEntry(path)
-      entry.setFileMode(org.spearce.jgit.lib.FileMode.REGULAR_FILE)
+      val entry = new org.eclipse.jgit.dircache.DirCacheEntry(path)
+      entry.setFileMode(org.eclipse.jgit.lib.FileMode.REGULAR_FILE)
       entry.setObjectId(blobId)
       builder.add(entry)
     }

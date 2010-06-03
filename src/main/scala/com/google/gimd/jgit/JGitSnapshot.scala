@@ -16,8 +16,8 @@ package com.google.gimd.jgit
 
 import com.google.gimd.Snapshot
 import com.google.gimd.file.{File, FileType}
-import org.spearce.jgit.revwalk.RevCommit
-import org.spearce.jgit.treewalk.TreeWalk
+import org.eclipse.jgit.revwalk.RevCommit
+import org.eclipse.jgit.treewalk.TreeWalk
 
 class JGitSnapshot(val branch: JGitBranch, val commit: RevCommit) extends Snapshot {
 

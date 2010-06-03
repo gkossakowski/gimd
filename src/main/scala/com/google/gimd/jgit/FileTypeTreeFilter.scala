@@ -13,10 +13,10 @@
 // limitations under the License.
 package com.google.gimd.jgit
 
-import org.spearce.jgit.lib.FileMode
+import org.eclipse.jgit.lib.FileMode
 import com.google.gimd.file.FileType
-import org.spearce.jgit.treewalk.filter.{AndTreeFilter, PathFilter, PathSuffixFilter, TreeFilter}
-import org.spearce.jgit.treewalk.TreeWalk
+import org.eclipse.jgit.treewalk.filter.{AndTreeFilter, PathFilter, PathSuffixFilter, TreeFilter}
+import org.eclipse.jgit.treewalk.TreeWalk
 
 
 object FileTypeTreeFilter {

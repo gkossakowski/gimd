@@ -15,7 +15,7 @@
 package com.google.gimd.jgit
 
 import com.google.gimd.GimdException
-import org.spearce.jgit.lib.Repository
+import org.eclipse.jgit.lib.Repository
 
 final class InvalidJGitBranchNameException(val repository: Repository, name: String)
         extends GimdException("'%1s' is invalid branch name".format(name), null)

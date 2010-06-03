@@ -16,7 +16,7 @@ package com.google.gimd.jgit
 
 import com.google.gimd.file.{FileType, File}
 import com.google.gimd.text.Parser
-import org.spearce.jgit.lib.{ObjectId, Repository}
+import org.eclipse.jgit.lib.{ObjectId, Repository}
 import java.io.{InputStreamReader, ByteArrayInputStream}
 
 final class JGitFile[T](val path: String, val blobId: ObjectId, val fileType: FileType[T],

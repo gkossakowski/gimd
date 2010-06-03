@@ -18,11 +18,11 @@ import com.google.gimd.{Database, Message, Snapshot}
 import com.google.gimd.file.FileType
 import com.google.gimd.modification.DatabaseModification
 import com.google.gimd.text.Formatter
-import org.spearce.jgit.lib._
-import org.spearce.jgit.merge.MergeStrategy
-import org.spearce.jgit.lib.RefUpdate.Result
-import org.spearce.jgit.dircache.{DirCache, DirCacheEditor, DirCacheEntry}
-import org.spearce.jgit.revwalk.{RevCommit, RevTree, RevWalk}
+import org.eclipse.jgit.lib._
+import org.eclipse.jgit.merge.MergeStrategy
+import org.eclipse.jgit.lib.RefUpdate.Result
+import org.eclipse.jgit.dircache.{DirCache, DirCacheEditor, DirCacheEntry}
+import org.eclipse.jgit.revwalk.{RevCommit, RevTree, RevWalk}
 import java.io.IOException
 
 class JGitDatabase(val fileTypes: List[FileType[_]], val branch: JGitBranch) extends Database {

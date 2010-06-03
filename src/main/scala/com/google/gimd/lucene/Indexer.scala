@@ -15,8 +15,8 @@
 package com.google.gimd.lucene
 
 import org.apache.lucene.index._
-import org.spearce.jgit.treewalk.TreeWalk
-import org.spearce.jgit.revwalk.{RevWalk, RevCommit}
+import org.eclipse.jgit.treewalk.TreeWalk
+import org.eclipse.jgit.revwalk.{RevWalk, RevCommit}
 import java.util.HashMap
 import com.google.gimd.file.{File, FileType}
 import com.google.gimd._
@@ -71,8 +71,8 @@ final class Indexer(db: Database, fileTypes: List[FileType[_]]) {
 
   private[lucene] def incremental(state: LuceneState, target: RevCommit, walk: RevWalk):
     LuceneState = {
-    import org.spearce.jgit.treewalk.filter.{AndTreeFilter, TreeFilter}
-    import org.spearce.jgit.lib.AnyObjectId
+    import org.eclipse.jgit.treewalk.filter.{AndTreeFilter, TreeFilter}
+    import org.eclipse.jgit.lib.AnyObjectId
     val ic: IndexCommit = state.indexCommit
     writer = new IndexWriter(lucDb, analyzer, deletePolicy, fieldLen, ic)
     val base: RevCommit = walk.parseCommit(state)

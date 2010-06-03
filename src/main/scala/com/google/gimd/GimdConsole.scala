@@ -42,7 +42,7 @@ object GimdConsole {
 
 
   protected object JGitUtils {
-    import org.spearce.jgit.lib.{PersonIdent, ObjectId, Commit, Repository, ObjectWriter, Constants}
+    import org.eclipse.jgit.lib.{PersonIdent, ObjectId, Commit, Repository, ObjectWriter, Constants}
 
     protected val masterRef = Constants.R_HEADS + Constants.MASTER
 
@@ -75,11 +75,11 @@ object GimdConsole {
     }
 
     protected def addFiles(repository: Repository, files: List[(String, ObjectId)]): ObjectId = {
-      val dc = org.spearce.jgit.dircache.DirCache.newInCore
+      val dc = org.eclipse.jgit.dircache.DirCache.newInCore
       val builder = dc.builder
       for ((path, blobId) <- files) {
-        val entry = new org.spearce.jgit.dircache.DirCacheEntry(path)
-        entry.setFileMode(org.spearce.jgit.lib.FileMode.REGULAR_FILE)
+        val entry = new org.eclipse.jgit.dircache.DirCacheEntry(path)
+        entry.setFileMode(org.eclipse.jgit.lib.FileMode.REGULAR_FILE)
         entry.setObjectId(blobId)
         builder.add(entry)
       }
