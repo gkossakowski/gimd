@@ -15,7 +15,8 @@ package com.google.gimd.lucene
 
 import java.io.IOException
 import com.google.gimd.jgit.{JGitDatabaseException, JGitSnapshot, JGitDatabase}
-import org.spearce.jgit.revwalk.RevWalk
+import com.google.gimd.Snapshot
+import com.google.gimd.modification.DatabaseModification
 
 trait LuceneOptimizedDatabase extends JGitDatabase {
 
@@ -29,6 +30,12 @@ trait LuceneOptimizedDatabase extends JGitDatabase {
     } catch {
       case e: IOException => throw new JGitDatabaseException(branch, e)
     }
+  }
+
+  override def modifyAndReturn[T](modification: Snapshot => (DatabaseModification, T)): T = {
+    val (result, commitId) = super.modifyAndReturnWithCommit(modification)
+    (luceneDb ! commitId)
+    result
   }
 
 }

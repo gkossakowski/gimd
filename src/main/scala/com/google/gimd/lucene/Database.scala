@@ -16,11 +16,13 @@ package com.google.gimd.lucene
 import org.apache.lucene.store.Directory
 import org.apache.lucene.index.{IndexCommit, IndexReader}
 import org.eclipse.jgit.revwalk.{RevCommit, RevWalk}
+import org.eclipse.jgit.lib.{ObjectIdSubclassMap, ObjectId, AnyObjectId}
 
 import com.google.gimd.lucene.Database.{UD_COMMIT, LuceneState}
 import org.apache.lucene.analysis.SimpleAnalyzer
 import com.google.gimd.file.FileType
 import com.google.gimd.jgit.JGitBranch
+import actors.Actor
 
 /**
  * Database that manages Lucene's Index for a given branch and list of file types.
@@ -28,7 +30,7 @@ import com.google.gimd.jgit.JGitBranch
  * The management is automatic which means it's Database responsibility to keep Index up-to-date
  * and to doing in efficient way.
  */
-final class Database(val branch: JGitBranch, val fileTypes: List[FileType[_]]) {
+final class Database(val branch: JGitBranch, val fileTypes: List[FileType[_]]) extends Actor {
 
   val luceneDirectory: Directory = {
     import java.io.File
@@ -37,6 +39,17 @@ final class Database(val branch: JGitBranch, val fileTypes: List[FileType[_]]) {
   }
 
   private var state: ObjectIdSubclassMap[LuceneState] = null
+
+  start()
+
+  def act = {
+    state == null
+    loop {
+      react {
+        case targetCommit: AnyObjectId => reply(read(targetCommit))
+      }
+    }
+  }
 
   /**
    * Obtain an index reader to search through a specific Git commit.
@@ -52,7 +65,7 @@ final class Database(val branch: JGitBranch, val fileTypes: List[FileType[_]]) {
    * @return the index reader for the requested commit.
    * @throws IOException
    */
-  def read(targetCommit: AnyObjectId): IndexReader = {
+  protected def read(targetCommit: AnyObjectId): IndexReader = {
     if (state == null) {
       state = scan(luceneDirectory)
     }

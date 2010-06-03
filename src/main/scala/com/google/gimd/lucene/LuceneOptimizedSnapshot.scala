@@ -19,6 +19,7 @@ import com.google.gimd.jgit.{FileTypeTreeFilter, JGitSnapshot}
 import com.google.gimd.file.{File, FileType}
 import org.apache.lucene.search.{Scorer, Collector, IndexSearcher, Query => LQuery}
 import collection.mutable.ListBuffer
+import org.apache.lucene.index.IndexReader
 
 /**
  * LuceneOptimizedSnapshot is a trait that implements query optimization by using Lucene's index.
@@ -36,7 +37,7 @@ trait LuceneOptimizedSnapshot extends JGitSnapshot {
     val luceneQuery = QueryBuilder(q)
 
     def searchLucene(luceneQuery: LQuery): Iterator[File[W]] = {
-      val indexReader = luceneDb.read(commit)
+      val indexReader = (luceneDb !? commit).asInstanceOf[IndexReader]
       val searcher = new IndexSearcher(indexReader)
       val collector = new PathCollector
       searcher.search(luceneQuery, collector)
