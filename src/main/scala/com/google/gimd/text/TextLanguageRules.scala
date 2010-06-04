@@ -70,17 +70,21 @@ object TextLanguageRules {
     || isNeedHexEscape(ch)
     )
 
-  private def isNumeric(x: String): Boolean =
-    Parser.numeric(new scala.util.parsing.input.CharSequenceReader(x + "\n")) match {
-      case _: Parser.Success[_] => true
+  private def isNumeric(x: String): Boolean = {
+    val parser = new Parser
+    parser.numeric(new scala.util.parsing.input.CharSequenceReader(x + "\n")) match {
+      case _: parser.Success[_] => true
       case _ => false
     }
+  }
 
-  private def isTimestamp(x: String): Boolean =
-    Parser.timestamp(new scala.util.parsing.input.CharSequenceReader(x + "\n")) match {
-      case _: Parser.Success[_] => true
+  private def isTimestamp(x: String): Boolean = {
+    val parser = new Parser
+    parser.timestamp(new scala.util.parsing.input.CharSequenceReader(x + "\n")) match {
+      case _: parser.Success[_] => true
       case _ => false
     }
+  }
 
   /**
    * Construct a new DateFormat for the ISO 8601 / RFC 3339 format.

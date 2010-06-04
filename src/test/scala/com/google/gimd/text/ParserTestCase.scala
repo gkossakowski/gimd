@@ -241,4 +241,29 @@ final class ParserTestCase {
   //TODO (1) Add tests for Int and Long specifically
   //TODO (2) Add tests for timestamps
 
+  @Test
+  def concurrentParsing {
+    def generateMessage(rnd: util.Random, minRank: Int): Option[Message] = {
+      import com.google.gimd.RandomTreeGenerator
+      import com.google.gimd.TestTree.Node1Type
+      val gen = new RandomTreeGenerator(rnd)
+      val msgs = Iterator.continually(Node1Type.toMessage(gen.generateNode1(gen.names, gen.ids)))
+      msgs.find(messageRank(_) > minRank)
+    }
+    def messageRank(m: Message): Int = {
+      import com.google.gimd.MessageField
+      val nestedMsgs = m.collect { case x: MessageField => x }
+      val simpleFields = m -- nestedMsgs
+      1 + simpleFields.size + nestedMsgs.map((x: MessageField) => messageRank(x.value)).sum
+    }
+    val N = 500
+    val msg = generateMessage(new util.Random(101), 100).get
+    val msgText = Formatter.format(msg)
+    def parse(s: String) = Parser.parse(s)
+    val futures = for (i <- 1 to N) yield actors.Futures.future {
+      parse(msgText)
+    }
+    assertTrue(actors.Futures.awaitAll(10000, futures: _*).forall(_.isDefined))
+  }
+
 }

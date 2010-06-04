@@ -25,14 +25,16 @@ import com.google.gimd._
 
 final class ParserException(msg: String) extends RuntimeException(msg)
 
-object Parser extends Parser {
+object Parser {
   def parse(in: String)        : Message = parse(new CharSequenceReader(in))
   def parse(in: java.io.Reader): Message = parse(StreamReader(in))
-  def parse(in: Reader[Char])  : Message =
-    phrase(message)(in) match {
-      case Success(result, _) => result
+  def parse(in: Reader[Char])  : Message = {
+    val parser = new Parser
+    parser.phrase(parser.message)(in) match {
+      case parser.Success(result, _) => result
       case err => throw new ParserException(err.toString)
     }
+  }
 }
 
 class Parser extends RegexParsers {
