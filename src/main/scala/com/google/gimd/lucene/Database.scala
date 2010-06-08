@@ -19,7 +19,6 @@ import org.eclipse.jgit.revwalk.{RevCommit, RevWalk}
 import org.eclipse.jgit.lib.{ObjectIdSubclassMap, ObjectId, AnyObjectId}
 
 import com.google.gimd.lucene.Database.{UD_COMMIT, LuceneState}
-import org.apache.lucene.analysis.SimpleAnalyzer
 import com.google.gimd.file.FileType
 import com.google.gimd.jgit.JGitBranch
 import actors.Actor
@@ -77,7 +76,7 @@ final class Database(val branch: JGitBranch, val fileTypes: List[FileType[_]]) e
     return IndexReader.open(s.indexCommit, true)
   }
 
-  private[lucene] def newAnalyzer() = new SimpleAnalyzer
+  private[lucene] def newAnalyzer() = new org.apache.lucene.analysis.SimpleAnalyzer
 
   private def indexNow(targetId: AnyObjectId): LuceneState = {
     val walk: RevWalk = new RevWalk(branch.repository)
