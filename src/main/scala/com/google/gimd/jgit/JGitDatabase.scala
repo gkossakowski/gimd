@@ -158,13 +158,17 @@ class JGitDatabase(val fileTypes: List[FileType[_]], val branch: JGitBranch) ext
   private def merge(commitToBeMerged: ObjectId): Option[ObjectId] = {
     val baseCommit = repository.resolve(branch.name)
     val merger = MergeStrategy.SIMPLE_TWO_WAY_IN_CORE.newMerger(repository)
-    if (merger.merge(baseCommit, commitToBeMerged)) {
-      val treeId = merger.getResultTreeId
-      val mergeCommit = createCommit(treeId, baseCommit, commitToBeMerged)
-      val result = updateRef(baseCommit, mergeCommit)
-      if (Result.FAST_FORWARD == result) Some(mergeCommit) else None
-    } else
-      None
+    try {
+      if (merger.merge(baseCommit, commitToBeMerged)) {
+        val treeId = merger.getResultTreeId
+        val mergeCommit = createCommit(treeId, baseCommit, commitToBeMerged)
+        val result = updateRef(baseCommit, mergeCommit)
+        if (Result.FAST_FORWARD == result) Some(mergeCommit) else None
+      } else
+        None
+    } catch {
+      case e: IOException if e.getMessage.contains("Multiple merge bases") => None
+    }
   }
 
   private def tryMerging(commitToBeMerged: ObjectId): Option[ObjectId] =
