@@ -100,7 +100,7 @@ class JGitDatabase(val fileTypes: List[FileType[_]], val branch: JGitBranch) ext
   val updateRefActor = new UpdateRefActor(branch)
 
   private def updateRef(oldCommit: ObjectId, newCommit: ObjectId): Result = {
-    val TIMEOUT = 1000
+    val TIMEOUT = 10000
     val msg = UpdateRefActor.UpdateRef(newCommit)
     val awaitAnswer = updateRefActor.awaitAnswer(TIMEOUT)
     awaitAnswer.!?(TIMEOUT, msg).asInstanceOf[Option[Result]] getOrElse Result.LOCK_FAILURE
