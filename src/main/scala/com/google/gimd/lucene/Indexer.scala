@@ -47,10 +47,15 @@ final class Indexer(db: Database, fileTypes: List[FileType[_]]) {
 
   private var writer: IndexWriter = null
 
+  def close() {
+    SimpleWriterCache.prune()
+  }
+
   private[lucene] def full(target: RevCommit): LuceneState = {
     import java.io.IOException
     if (IndexReader.indexExists(lucDb))
       throw new IOException("index already exists, cannot do full")
+    SimpleWriterCache.prune()
     writer = new IndexWriter(lucDb, analyzer, true, deletePolicy, fieldLen)
     //this is dummy command that enforces commit when there are no other changes to commit
     //i.e. in case of indexing an empty repository
@@ -66,7 +71,9 @@ final class Indexer(db: Database, fileTypes: List[FileType[_]]) {
         }
       }
     }
-    return commit(target)
+    val state = commit(target)
+    SimpleWriterCache.store(state.indexCommit, writer)
+    state
   }
 
   private[lucene] def incremental(state: LuceneState, target: RevCommit, walk: RevWalk):
@@ -74,7 +81,7 @@ final class Indexer(db: Database, fileTypes: List[FileType[_]]) {
     import org.eclipse.jgit.treewalk.filter.{AndTreeFilter, TreeFilter}
     import org.eclipse.jgit.lib.AnyObjectId
     val ic: IndexCommit = state.indexCommit
-    writer = new IndexWriter(lucDb, analyzer, deletePolicy, fieldLen, ic)
+    writer = SimpleWriterCache.get(ic, new IndexWriter(lucDb, analyzer, deletePolicy, fieldLen, ic))
     val base: RevCommit = walk.parseCommit(state)
     for (ft <- fileTypes) {
       tree.reset(Array[AnyObjectId](target.getTree, base.getTree))
@@ -93,7 +100,9 @@ final class Indexer(db: Database, fileTypes: List[FileType[_]]) {
         }
       }
     }
-    return commit(target)
+    val newState = commit(target)
+    SimpleWriterCache.store(newState.indexCommit, writer)
+    newState
   }
 
   private def commit(target: RevCommit): LuceneState = {
@@ -101,7 +110,6 @@ final class Indexer(db: Database, fileTypes: List[FileType[_]]) {
     lcommit.put(Database.UD_COMMIT, target.name)
     writer.commit(lcommit)
     val state = writer.getReader.getIndexCommit
-    writer.close
     new LuceneState(target, state)
   }
 
@@ -144,6 +152,42 @@ final class Indexer(db: Database, fileTypes: List[FileType[_]]) {
     def onInit(commits: java.util.List[_ <: IndexCommit]): Unit = ()
 
     def onCommit(arg0: java.util.List[_ <: IndexCommit]): Unit = ()
+  }
+
+  /**
+   * Simple cache for IndexWriter instance.
+   *
+   * We need this cache because creation and closing instances of IndexWriter is very expensive
+   * operation. This cache stores only one instance of IndexWriter because IndexWriter holds an
+   * exclusive lock on the index.
+   *
+   * This is suboptimal situations because in Gimd we *expect* for Index to diverge for a while
+   * before it gets merged. This will often involve invalidating cached IndexWriter and obtaining
+   * a new one for another branch. It's not clear at this point how to optimize this.
+   */
+  object SimpleWriterCache {
+    private var commitWriter: Option[(IndexCommit, IndexWriter)] = None
+    def get(commit: IndexCommit, newWriter: => IndexWriter): IndexWriter = {
+      (for ((c, w) <- commitWriter if (c == commit)) yield w) match {
+        case Some(w) => w
+        case None => {
+          val writer = newWriter
+          store(commit, writer)
+          writer
+        }
+      }
+    }
+    def store(commit: IndexCommit, writer: IndexWriter) {
+      commitWriter.foreach {
+        case (_, w) if (w != writer) => w.close()
+        case _ => ()
+      }
+      commitWriter = Some((commit, writer))
+    }
+    def prune() {
+      commitWriter.foreach(_._2.close())
+      commitWriter = None
+    }
   }
 
 }
