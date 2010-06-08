@@ -31,7 +31,7 @@ import Indexer._
  *   a) full
  *   b) incremental
  *
- * Both of them take target paremeter which is Git's commit. They will scan for all files in a tree
+ * Both of them take target parameter which is Git's commit. They will scan for all files in a tree
  * pointed by given commit and will index the contents of these files.
  */
 final class Indexer(db: Database, fileTypes: List[FileType[_]]) {
