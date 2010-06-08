@@ -81,6 +81,12 @@ class JGitDatabase(val fileTypes: List[FileType[_]], val branch: JGitBranch) ext
       //if there was a change since onto commit update gets rejected. Still it might be that change
       //did not affected files we are trying to modify. Thus we are trying merging both changes.
       case Result.REJECTED => tryMerging(commitId)
+      //NO_CHANGE is returned in case that both onto and commitId are the same. From Gimd's point of
+      //view it means that some concurrent change has been applied that brought Gimd's db to the
+      //exactly the same state we are trying to commit here. The only way to handle this case is to
+      //reset the transaction. We do that by returning None which means that current modification
+      //cannot be applied and the transaction has to be restarted
+      case Result.NO_CHANGE => None
       //TODO: There should be a special treatment of LOCK_FAILURE case but it's low-priority task
       //the idea is to not try merging if just JGit fails to obtain lock for given reference
       case _ =>
