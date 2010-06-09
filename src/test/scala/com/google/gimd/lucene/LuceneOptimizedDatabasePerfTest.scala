@@ -12,6 +12,7 @@
 package com.google.gimd.jgit
 
 import com.google.gimd._
+import file.FileType
 import lucene.{LuceneTestCase, LuceneOptimizedDatabase}
 import modification.DatabaseModification
 import scala.util.Random
@@ -25,6 +26,23 @@ import com.google.gimd.TestTree._
 class LuceneOptimizedDatabasePerfTest extends AbstractJGitTestCase with LuceneTestCase
         with PerfTest {
 
+  case class Counter(name: String, value: Int)
+
+  object CounterType extends UserType[Counter] {
+    import UserType._
+    val name = FieldSpecOne("name", StringField, _.name)
+    val value = FieldSpecOne("value", IntField, _.value)
+    def fields = name :: value :: Nil
+    def toUserObject(m: Message): Counter = Counter(name(m), value(m))
+  }
+
+  object CounterFileType extends FileType[Counter] {
+    import UserType._
+    val pathPrefix = Some("counters/")
+    val pathSuffix = None
+    val userType = CounterType
+    def name(m: Message) = userType.name(m)
+  }
 
   val fileTypes: List[FileType[_]] = List(CounterFileType, Node1FileType, Node2FileType)
 
@@ -106,6 +124,39 @@ class LuceneOptimizedDatabasePerfTest extends AbstractJGitTestCase with LuceneTe
 
     println("Measuring without Lucene enabled")
     println(formatInfo("query without Lucene enabled", measureTime(N, a2)))
+  }
+
+  @Test
+  def measureConcurrentModifications = withLuceneDb { db =>
+    import com.google.gimd.query.Handle
+    import query.Query._
+    val N = 5
+    val modificationProb = 0.2
+
+    def choose(rnd: util.Random, prob: Double, opt1: => Unit, opt2: => Unit) =
+      if (rnd.nextDouble <= prob) opt1 else opt2
+    
+    db.modify { _ =>
+      val counters = (1 to N) map(x => Counter("counter"+x, 0))
+      counters.foldLeft(modification.DatabaseModification.empty) {
+        case (m, x) => m.insertFile(CounterFileType, x)
+      }
+    }
+
+    def checkCounter(s: Snapshot, n: Int): (Handle[Counter], Counter) =
+      s.query(CounterFileType, CounterType.query where { _.name === ("counter"+n) }).next
+    def incrementCounter(db: Database, n: Int) = db.modify { s =>
+        val (handle, counter) = checkCounter(s, n)
+        val newCounter = Counter(counter.name, counter.value+1)
+        modification.DatabaseModification.empty.modify(handle, newCounter)
+    }
+
+    val rnd = new util.Random(101)
+    def futures(times: Int) = for (_ <- 1 to times; i <- 1 to N) yield actors.Futures.future {
+      choose(rnd, modificationProb, incrementCounter(db, i), checkCounter(db.latestSnapshot, i))
+    }
+    def work = actors.Futures.awaitAll(10000, futures(2):_*)
+    println(formatInfo("concurrentModifications", measureTime(500, () => work)))
   }
 
 }
