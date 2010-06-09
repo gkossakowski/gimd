@@ -40,6 +40,8 @@ class JGitFileTestCase extends AbstractJGitTestCase {
     def name(m: Message) = userType.name(m).toString
   }
 
+  val fileTypes = SimpleMessageFileType :: Nil
+
   @Test
   def testMessage {
     val simpleMessage = SimpleMessage("Test", 10)

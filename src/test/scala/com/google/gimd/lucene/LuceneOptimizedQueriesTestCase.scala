@@ -19,12 +19,9 @@ import com.google.gimd.TestTree._
 import org.junit.Test
 import org.junit.Assert._
 
-class LuceneOptimizedQueriesTestCase extends AbstractJGitTestCase {
+class LuceneOptimizedQueriesTestCase extends AbstractJGitTestCase with LuceneTestCase {
 
-  private val fileTypes = Node1FileType :: Node2FileType :: Nil
-
-  private def createDatabase =
-    new JGitDatabase(fileTypes, masterBranch) with LuceneOptimizedDatabase
+  val fileTypes = Node1FileType :: Node2FileType :: Nil
 
   private def createNodes(db: JGitDatabase): Unit = {
     val MAX_NUMBER_OF_NODES = 5
@@ -41,8 +38,7 @@ class LuceneOptimizedQueriesTestCase extends AbstractJGitTestCase {
   }
 
   @Test
-  def testQueryForMissingObject {
-    val db = createDatabase
+  def testQueryForMissingObject = withLuceneDb { db =>
     createNodes(db)
     import com.google.gimd.query.Query._
     val q = Node1Type.query where { _.name === "non-existing" }
@@ -50,8 +46,7 @@ class LuceneOptimizedQueriesTestCase extends AbstractJGitTestCase {
   }
 
   @Test
-  def eqIntQuery {
-    val db = createDatabase
+  def eqIntQuery = withLuceneDb { db =>
     createNodes(db)
     import com.google.gimd.query.Query._
     val q = Node2Type.query where { _.id === 2 }
@@ -59,8 +54,7 @@ class LuceneOptimizedQueriesTestCase extends AbstractJGitTestCase {
   }
 
   @Test
-  def nameLessThanQuery {
-    val db = createDatabase
+  def nameLessThanQuery = withLuceneDb { db =>
     createNodes(db)
     import com.google.gimd.query.Query._
     val q = Node1Type.query where { _.name < "node4" }
@@ -68,8 +62,7 @@ class LuceneOptimizedQueriesTestCase extends AbstractJGitTestCase {
   }
 
   @Test
-  def nameMoreThanOrEqQuery {
-    val db = createDatabase
+  def nameMoreThanOrEqQuery = withLuceneDb { db =>
     createNodes(db)
     import com.google.gimd.query.Query._
     val q = Node1Type.query where { _.name >= "node2" }
@@ -77,8 +70,7 @@ class LuceneOptimizedQueriesTestCase extends AbstractJGitTestCase {
   }
 
   @Test
-  def idLessThanQuery {
-    val db = createDatabase
+  def idLessThanQuery = withLuceneDb { db =>
     createNodes(db)
     import com.google.gimd.query.Query._
     val q = Node2Type.query where { _.id < 5 }
@@ -86,8 +78,7 @@ class LuceneOptimizedQueriesTestCase extends AbstractJGitTestCase {
   }
 
   @Test
-  def idMoreThanOrEqQuery {
-    val db = createDatabase
+  def idMoreThanOrEqQuery = withLuceneDb { db =>
     createNodes(db)
     import com.google.gimd.query.Query._
     val q = Node2Type.query where { _.id >= 2 }
@@ -95,8 +86,7 @@ class LuceneOptimizedQueriesTestCase extends AbstractJGitTestCase {
   }
 
   @Test
-  def fullAndIncrementalIndexing {
-    val db = createDatabase
+  def fullAndIncrementalIndexing = withLuceneDb { db =>
     db.modify { s =>
       //this query forces empty index creation
       if (s.query(Node1FileType, Node1Type.query).isEmpty) {

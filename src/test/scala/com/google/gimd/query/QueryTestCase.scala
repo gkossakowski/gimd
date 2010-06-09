@@ -20,9 +20,7 @@ import org.junit.Test
 import org.junit.Assert._
 
 class QueryTestCase extends AbstractJGitTestCase {
-  private val fileTypes = Node1FileType :: Node2FileType :: Nil
-
-  private def createDatabase = new JGitDatabase(fileTypes, masterBranch)
+  val fileTypes = Node1FileType :: Node2FileType :: Nil
 
   private def createNodes(db: JGitDatabase): Unit = {
     val MAX_NUMBER_OF_NODES = 5
@@ -39,8 +37,7 @@ class QueryTestCase extends AbstractJGitTestCase {
   }
 
   @Test
-  def testGreaterThanQuery {
-    val db = createDatabase
+  def testGreaterThanQuery = withDb { db =>
     createNodes(db)
     import com.google.gimd.query.Query._
     val q1 = Node1Type.query where { _.name > "node" }
@@ -50,8 +47,7 @@ class QueryTestCase extends AbstractJGitTestCase {
   }
 
   @Test
-  def testLessThanOrEqQuery {
-    val db = createDatabase
+  def testLessThanOrEqQuery = withDb { db =>
     createNodes(db)
     import com.google.gimd.query.Query._
     val q1 = Node1Type.query where { _.name <= "node2" }

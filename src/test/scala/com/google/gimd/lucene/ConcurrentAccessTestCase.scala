@@ -22,7 +22,7 @@ import org.junit.Test
 import actors.Futures
 import org.junit.Assert._
 
-class ConcurrentAccessTestCase extends AbstractJGitTestCase {
+class ConcurrentAccessTestCase extends AbstractJGitTestCase with LuceneTestCase {
 
   override val deleteRepository = true
 
@@ -42,15 +42,10 @@ class ConcurrentAccessTestCase extends AbstractJGitTestCase {
     def name(m: Message) = userType.name(m)
   }
 
-  private val fileTypes = CounterFileType :: Nil
-
-  private def createDatabase = new JGitDatabase(fileTypes, masterBranch)
-  private def createDatabaseLucene = new JGitDatabase(fileTypes, masterBranch) with
-          LuceneOptimizedDatabase
+  val fileTypes = CounterFileType :: Nil
 
   private def concurrentModifications(db: com.google.gimd.Database) {
-    val N = 5
-    val db = createDatabase
+    val N = 20
     db.modify { _ =>
       val counters = (1 to N) map(x => Counter("counter"+x, 0))
       counters.foldLeft(modification.DatabaseModification.empty) {
@@ -70,13 +65,13 @@ class ConcurrentAccessTestCase extends AbstractJGitTestCase {
   }
 
   @Test
-  def concurrentModificationsWithoutLucene {
-    concurrentModifications(createDatabase)
+  def concurrentModificationsWithoutLucene = withDb { db =>
+    concurrentModifications(db)
   }
 
   @Test
-  def concurrentModificationsWithLucene {
-    concurrentModifications(createDatabaseLucene)
+  def concurrentModificationsWithLucene = withLuceneDb { db =>
+    concurrentModifications(db)
   }
 
 

@@ -42,7 +42,7 @@ final class JGitDatabaseTestCase extends AbstractJGitTestCase {
     def name(m: Message) = userType.name(m)
   }
 
-  private val fileTypes = SimpleMessageFileType :: Nil
+  val fileTypes = SimpleMessageFileType :: Nil
 
   private def createDatabase = new JGitDatabase(fileTypes, masterBranch)
 
@@ -58,9 +58,9 @@ final class JGitDatabaseTestCase extends AbstractJGitTestCase {
     )
     commit(files)
 
-    val db = createDatabase
-
-    val foundFiles = db.latestSnapshot.all(SimpleMessageFileType).toList
+    val foundFiles = withDb { db =>
+      db.latestSnapshot.all(SimpleMessageFileType).toList
+    } 
 
     val expected = List("sm/first.sm", "sm/second.sm")
     assertEquals(expected, foundFiles.map(_.path))
@@ -78,9 +78,9 @@ final class JGitDatabaseTestCase extends AbstractJGitTestCase {
     )
     commit(files)
 
-    val db = createDatabase
-
-    val foundFiles = db.latestSnapshot.all(SimpleMessageFileType).toList
+    val foundFiles = withDb { db =>
+      db.latestSnapshot.all(SimpleMessageFileType).toList
+    }
 
     val expected = List(first, second)
     assertEquals(expected, foundFiles.map(_.userObject))
@@ -99,9 +99,9 @@ final class JGitDatabaseTestCase extends AbstractJGitTestCase {
     val commitId = createCommit("Test commit", treeId)
     moveMaster(commitId)
 
-    val db = createDatabase
-
-    val foundFiles = db.latestSnapshot.all(SimpleMessageFileType).toList
+    val foundFiles = withDb { db =>
+      db.latestSnapshot.all(SimpleMessageFileType).toList
+    }
     assertEquals(Nil, foundFiles)
   }
 
@@ -118,17 +118,16 @@ final class JGitDatabaseTestCase extends AbstractJGitTestCase {
                        writeMessage(SimpleMessageType, second))
     commit(paths zip blobIds)
 
-    val db = createDatabase
-
-    db.modify { snapshot =>
-      val q = SimpleMessageType.query where { _.name === "second" }
-      val sms = snapshot.query(SimpleMessageFileType, q)
-      sms.foldLeft(DatabaseModification.empty) {
-        case (m, (h, sm)) => m.modify(h, SimpleMessage(sm.name, sm.value+1))
+    val foundFiles = withDb { db =>
+      db.modify { snapshot =>
+        val q = SimpleMessageType.query where { _.name === "second" }
+        val sms = snapshot.query(SimpleMessageFileType, q)
+        sms.foldLeft(DatabaseModification.empty) {
+          case (m, (h, sm)) => m.modify(h, SimpleMessage(sm.name, sm.value+1))
+        }
       }
+      db.latestSnapshot.all(SimpleMessageFileType).toList
     }
-
-    val foundFiles = db.latestSnapshot.all(SimpleMessageFileType).toList
 
     val expectedMsgs = List(first, SimpleMessage(second.name, second.value+1))
     assertEquals(expectedMsgs, foundFiles.map(_.userObject))
@@ -152,15 +151,16 @@ final class JGitDatabaseTestCase extends AbstractJGitTestCase {
 
     val third = SimpleMessage("third", 3)
 
-    db.modify { snapshot =>
-      val q = SimpleMessageType.query where { _.name === "second" }
-      val sms = snapshot.query(SimpleMessageFileType, q)
-      sms.foldLeft(DatabaseModification.empty) {
-        case (m, (h, sm)) => m.modify(h, third)
+    val foundFiles = withDb { db =>
+      db.modify { snapshot =>
+        val q = SimpleMessageType.query where { _.name === "second" }
+        val sms = snapshot.query(SimpleMessageFileType, q)
+        sms.foldLeft(DatabaseModification.empty) {
+          case (m, (h, sm)) => m.modify(h, third)
+        }
       }
+      db.latestSnapshot.all(SimpleMessageFileType).toList
     }
-
-    val foundFiles = db.latestSnapshot.all(SimpleMessageFileType).toList
 
     val expectedMsgs = List(first, third)
     val expectedPaths = List("sm/first.sm", "sm/third.sm")
@@ -183,15 +183,16 @@ final class JGitDatabaseTestCase extends AbstractJGitTestCase {
 
     val db = createDatabase
 
-    db.modify { snapshot =>
-      val q = SimpleMessageType.query where { _.name === "second" }
-      val sms = snapshot.query(SimpleMessageFileType, q)
-      sms.foldLeft(DatabaseModification.empty) {
-        case (m, (h, sm)) => m.remove(h)
+    val foundFiles = withDb { db =>
+      db.modify { snapshot =>
+        val q = SimpleMessageType.query where { _.name === "second" }
+        val sms = snapshot.query(SimpleMessageFileType, q)
+        sms.foldLeft(DatabaseModification.empty) {
+          case (m, (h, sm)) => m.remove(h)
+        }
       }
+      db.latestSnapshot.all(SimpleMessageFileType).toList
     }
-
-    val foundFiles = db.latestSnapshot.all(SimpleMessageFileType).toList
 
     val expected = List(first)
     assertEquals(expected, foundFiles.map(_.userObject))
@@ -206,9 +207,9 @@ final class JGitDatabaseTestCase extends AbstractJGitTestCase {
 
     commit(List(path -> blobId))
 
-    val db = createDatabase
-
-    val result = db.modifyAndReturn { _ => (DatabaseModification.empty, expected) }
+    val result = withDb { db =>
+      db.modifyAndReturn { _ => (DatabaseModification.empty, expected) }
+    }
 
     assertEquals(expected, result)
   }

@@ -12,7 +12,7 @@
 package com.google.gimd.jgit
 
 import com.google.gimd._
-import lucene.LuceneOptimizedDatabase
+import lucene.{LuceneTestCase, LuceneOptimizedDatabase}
 import modification.DatabaseModification
 import scala.util.Random
 import org.junit.Test
@@ -22,12 +22,11 @@ import com.google.gimd.TestTree._
  * Simple performance tests that allows one to see the difference in execution time between
  * Lucene-optimized queries and full scan queries.
  */
-class LuceneOptimizedDatabasePerfTest extends AbstractJGitTestCase with PerfTest {
+class LuceneOptimizedDatabasePerfTest extends AbstractJGitTestCase with LuceneTestCase
+        with PerfTest {
 
-  private val fileTypes = Node1FileType :: Node2FileType :: Nil
 
-  private def createDatabase =
-    new JGitDatabase(fileTypes, masterBranch) with LuceneOptimizedDatabase
+  val fileTypes: List[FileType[_]] = List(CounterFileType, Node1FileType, Node2FileType)
 
   private def createNodes(rnd: Random): DatabaseModification = {
     val MAX_NUMBER_OF_NODES = 100
@@ -49,10 +48,8 @@ class LuceneOptimizedDatabasePerfTest extends AbstractJGitTestCase with PerfTest
   }
 
   @Test
-  def measureEqQueryTime {
+  def measureEqQueryTime = withLuceneDb { db =>
     println("Measuring 'equality' query time.")
-    val db = createDatabase
-    generateNodes(db)
     import com.google.gimd.query.Query._
     val q1 = Node1Type.query where { _.name === "GqfDGUe" }
     val q2 = Node2Type.query where { _.id === 114528 }
@@ -81,9 +78,8 @@ class LuceneOptimizedDatabasePerfTest extends AbstractJGitTestCase with PerfTest
   }
 
   @Test
-  def measureLtQueryTime {
+  def measureLtQueryTime = withLuceneDb { db =>
     println("Measuring 'less than' query time.")
-    val db = createDatabase
     generateNodes(db)
     import com.google.gimd.query.Query._
     val q1 = Node1Type.query where { _.name < "aaa" }

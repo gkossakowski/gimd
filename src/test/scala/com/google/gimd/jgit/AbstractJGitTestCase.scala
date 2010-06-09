@@ -14,11 +14,12 @@
 
 package com.google.gimd.jgit
 
-import com.google.gimd.UserType
+import com.google.gimd.{Database, UserType}
+import com.google.gimd.file.FileType
+import com.google.gimd.text.Formatter
 import org.eclipse.jgit.lib._
 import org.junit.{After, Before}
 import java.io.{ByteArrayInputStream, IOException, File}
-import com.google.gimd.text.Formatter
 
 abstract class AbstractJGitTestCase {
 
@@ -33,6 +34,19 @@ abstract class AbstractJGitTestCase {
    * of test-case execution.
    */
   protected val deleteRepository = true
+
+  protected val fileTypes: List[FileType[_]]
+
+  protected def createDb = new JGitDatabase(fileTypes, masterBranch)
+
+  protected def withDb[T](f: JGitDatabase => T): T = {
+    val db = createDb
+    try {
+      f(db)
+    } finally {
+      db.close()
+    }
+  }
 
   @Before protected def createRepository {
     val file = new File(repositoryPath + "/.git")
