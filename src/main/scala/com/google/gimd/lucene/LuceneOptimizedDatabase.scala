@@ -38,4 +38,9 @@ trait LuceneOptimizedDatabase extends JGitDatabase {
     result
   }
 
+  override def close() {
+    assert((luceneDb !? Database.Stop) == Database.Stopped)
+    super.close()
+  }
+
 }

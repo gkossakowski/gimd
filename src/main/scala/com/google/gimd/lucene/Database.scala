@@ -54,6 +54,11 @@ final class Database(val branch: JGitBranch, val fileTypes: List[FileType[_]]) e
             ir.close()
           }
         }
+        case Database.Stop => {
+          indexer.close()
+          reply(Database.Stopped)
+          exit()
+        }
       }
     }
   }
@@ -198,4 +203,6 @@ object Database {
           extends ObjectId(commitId)
 
   case class Search(query: Query, commit: AnyObjectId)
+  case object Stop
+  case object Stopped
 }
