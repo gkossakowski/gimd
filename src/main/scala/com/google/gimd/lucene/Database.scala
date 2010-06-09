@@ -46,9 +46,23 @@ final class Database(val branch: JGitBranch, val fileTypes: List[FileType[_]]) e
     val indexer = new Indexer(this, fileTypes)
     loop {
       react {
-        case targetCommit: AnyObjectId => reply(read(indexer, targetCommit))
+        case Database.Search(query, commit) => reply {
+          val ir = read(indexer, commit)
+          try {
+            search(ir, query, commit)
+          } finally {
+            ir.close()
+          }
+        }
       }
     }
+  }
+
+  protected def search(ir: IndexReader, query: Query, commit: AnyObjectId): List[String] = {
+    val searcher = new org.apache.lucene.search.IndexSearcher(ir)
+    val collector = new PathCollector
+    searcher.search(query, collector)
+    collector.getPaths
   }
 
   /**
@@ -148,6 +162,28 @@ final class Database(val branch: JGitBranch, val fileTypes: List[FileType[_]]) e
     }
   }
 
+  private class PathCollector extends Collector {
+    import org.apache.lucene.index.IndexReader
+    private var reader: IndexReader = null
+    private val paths = new collection.mutable.ListBuffer[String]
+
+    val acceptsDocsOutOfOrder = true
+
+    def setScorer(scorer: Scorer) = {}
+
+    def setNextReader(reader: IndexReader, docBase: Int) {
+      this.reader = reader
+    }
+
+    def collect(doc: Int) {
+      val document = reader.document(doc)
+      val path = document.get(Indexer.PATH_NAME)
+      paths += path
+    }
+
+    def getPaths = paths.toList.distinct
+  }
+
 }
 
 object Database {
@@ -161,4 +197,5 @@ object Database {
   private[lucene] final class LuceneState(val commitId: AnyObjectId, val indexCommit: IndexCommit)
           extends ObjectId(commitId)
 
+  case class Search(query: Query, commit: AnyObjectId)
 }

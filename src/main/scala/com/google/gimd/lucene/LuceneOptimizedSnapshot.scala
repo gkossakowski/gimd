@@ -17,9 +17,7 @@ import com.google.gimd.query.{Handle, Query}
 import org.eclipse.jgit.treewalk.TreeWalk
 import com.google.gimd.jgit.{FileTypeTreeFilter, JGitSnapshot}
 import com.google.gimd.file.{File, FileType}
-import org.apache.lucene.search.{Scorer, Collector, IndexSearcher, Query => LQuery}
-import collection.mutable.ListBuffer
-import org.apache.lucene.index.IndexReader
+import org.apache.lucene.search.{Query => LQuery}
 
 /**
  * LuceneOptimizedSnapshot is a trait that implements query optimization by using Lucene's index.
@@ -37,15 +35,14 @@ trait LuceneOptimizedSnapshot extends JGitSnapshot {
     val luceneQuery = QueryBuilder(q)
 
     def searchLucene(luceneQuery: LQuery): Iterator[File[W]] = {
-      val indexReader = (luceneDb !? commit).asInstanceOf[IndexReader]
-      val searcher = new IndexSearcher(indexReader)
-      val collector = new PathCollector
-      searcher.search(luceneQuery, collector)
-      val paths = collector.getPaths
-      if (paths.isEmpty)
-        Iterator.empty
+      val TIMEOUT = 10000
+      import Database.Search
+      val paths = (luceneDb.!?(TIMEOUT, Search(luceneQuery,commit))).
+              asInstanceOf[Option[List[String]]] getOrElse Nil
+      if (!paths.isEmpty)
+        new TreeWalkIterator(ft, treeWalkWithPaths(ft, paths))
       else
-        new TreeWalkIterator(ft, treeWalkWithPaths(ft, collector.getPaths))
+        Iterator.empty
     }
     if (luceneQuery.isEmpty)
       println("Failed to obtain Lucene query for query: \n" + q)
@@ -63,28 +60,6 @@ trait LuceneOptimizedSnapshot extends JGitSnapshot {
     val pathsFilter = PathFilterGroup.createFromStrings(java.util.Arrays.asList(paths.toArray: _*))
     treeWalk.setFilter(AndTreeFilter.create(Array(ftFilter, pathsFilter)))
     treeWalk
-  }
-
-  private class PathCollector extends Collector {
-    import org.apache.lucene.index.IndexReader
-    private var reader: IndexReader = null
-    private val paths = new ListBuffer[String]
-
-    val acceptsDocsOutOfOrder = true
-
-    def setScorer(scorer: Scorer) = {}
-
-    def setNextReader(reader: IndexReader, docBase: Int) {
-      this.reader = reader
-    }
-
-    def collect(doc: Int) {
-      val document = reader.document(doc)
-      val path = document.get(Indexer.PATH_NAME)
-      paths += path
-    }
-
-    def getPaths = paths.toList.distinct
   }
 
 }
