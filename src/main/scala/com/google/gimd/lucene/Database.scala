@@ -15,6 +15,7 @@ package com.google.gimd.lucene
 
 import org.apache.lucene.store.Directory
 import org.apache.lucene.index.{IndexCommit, IndexReader}
+import org.apache.lucene.search.{Scorer, Collector, Query}
 import org.eclipse.jgit.revwalk.{RevCommit, RevWalk}
 import org.eclipse.jgit.lib.{ObjectIdSubclassMap, ObjectId, AnyObjectId}
 
@@ -37,15 +38,15 @@ final class Database(val branch: JGitBranch, val fileTypes: List[FileType[_]]) e
     org.apache.lucene.store.FSDirectory.open(ldir)
   }
 
-  private var state: ObjectIdSubclassMap[LuceneState] = null
+  val state = scan(luceneDirectory)
 
   start()
 
   def act = {
-    state == null
+    val indexer = new Indexer(this, fileTypes)
     loop {
       react {
-        case targetCommit: AnyObjectId => reply(read(targetCommit))
+        case targetCommit: AnyObjectId => reply(read(indexer, targetCommit))
       }
     }
   }
@@ -64,13 +65,10 @@ final class Database(val branch: JGitBranch, val fileTypes: List[FileType[_]]) e
    * @return the index reader for the requested commit.
    * @throws IOException
    */
-  protected def read(targetCommit: AnyObjectId): IndexReader = {
-    if (state == null) {
-      state = scan(luceneDirectory)
-    }
+  protected def read(indexer: Indexer, targetCommit: AnyObjectId): IndexReader = {
     var s: LuceneState = state.get(targetCommit)
     if (s == null) {
-      s = indexNow(targetCommit)
+      s = indexNow(indexer, targetCommit)
       state.add(s)
     }
     return IndexReader.open(s.indexCommit, true)
@@ -78,14 +76,15 @@ final class Database(val branch: JGitBranch, val fileTypes: List[FileType[_]]) e
 
   private[lucene] def newAnalyzer() = new org.apache.lucene.analysis.SimpleAnalyzer
 
-  private def indexNow(targetId: AnyObjectId): LuceneState = {
+  private def indexNow(indexer: Indexer, targetId: AnyObjectId): LuceneState = {
     val walk: RevWalk = new RevWalk(branch.repository)
     val target: RevCommit = walk.parseCommit(targetId)
     var base: LuceneState = baseState(walk, target)
     if (base != null) {
-      return new Indexer(this, fileTypes).incremental(base, target, walk)
+      indexer.incremental(base, target, walk)
+    } else {
+      indexer.full(target)
     }
-    return new Indexer(this, fileTypes).full(target)
   }
 
   private def baseState(walk: RevWalk, start: RevCommit): LuceneState = {
