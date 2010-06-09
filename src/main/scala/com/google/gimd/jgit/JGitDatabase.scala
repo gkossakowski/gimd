@@ -45,6 +45,10 @@ class JGitDatabase(val fileTypes: List[FileType[_]], val branch: JGitBranch) ext
 
   protected val repository = branch.repository
 
+  def close() {
+    repository.close
+  }
+
   def latestSnapshot: JGitSnapshot = {
     try {
       new JGitSnapshot(branch, latestCommitId)
