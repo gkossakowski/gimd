@@ -20,10 +20,8 @@ class GimdProject(info: ProjectInfo) extends DefaultProject(info) with IdeaPlugi
   val jgitRepo = "jgit-repository" at "http://download.eclipse.org/jgit/maven"
   val jgit = "org.eclipse.jgit" % "org.eclipse.jgit" % "0.7.1" withSources()
 
-  val scalaTools = "scala-tools" at "http://scala-tools.org/repo-releases"
-  val scalaCheck = ("org.scala-tools.testing" % "scalacheck_2.8.0.RC3" % "1.8-SANPSHOT" % "test"
-          from
-        "http://dl.dropbox.com/u/106552/scalacheck_2.8.0_RC3/scalacheck_2.8.0.RC3-1.8-SNAPSHOT.jar")
+  val scalaTools = "scala-tools-snapshots" at "http://scala-tools.org/repo-snapshots"
+  val scalaCheck = "org.scala-tools.testing" % "scalacheck_2.8.0.RC3" % "1.8-SNAPSHOT" % "test"
 
   val bryanjswift = "Bryan J Swift Repository" at "http://repos.bryanjswift.com/maven2/"
   val junitInterface = "com.novocode" % "junit-interface" % "0.4.0" % "test"
